@@ -1,5 +1,5 @@
 # 基於 Python 3.9 映像
-FROM python:3.9
+FROM python:3.10
 
 # 設置工作目錄，對應 FastAPI 應用的目錄
 WORKDIR /workspace/project/fastapi

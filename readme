@@ -1,0 +1,8 @@
+# Step 1 : 確認目前電腦 docker 正在運行
+docker info
+
+# Step 2 : 構建 Docker 映像
+docker build -t my-fastapi-app .
+
+# Step 3 : 執行映像
+docker run -d -p 8080:8080 --name fastapi-container-new my-fastapi-app
