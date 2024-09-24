@@ -184,6 +184,7 @@
     <div class="container">
         <div class="header">
             <h1>Demographics Report</h1>
+            
             <div class="actions">
                 <button>
                     <div id="controls-status">
@@ -241,7 +242,13 @@
         </div>
         <div class="content-wrapper">
             <div class="container">
-                <h4>Map</h4>
+                <div  style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="float: left;">Map</h4>
+
+                    <a id="current_loc_button" style="float: right;" tabindex="0" class="btn elevated rounded">顯示我的位置</a>
+                
+                </div>
+  
                 <div id = "map"></div>
             </div>
             <div class="demographics">
@@ -257,7 +264,7 @@
 
     <script>
         var map = L.map('map').setView([25.0330, 121.5654], 14);
-
+    
         var redIcon = new L.Icon({
             iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
             iconSize: [25, 25],
@@ -265,7 +272,7 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
-
+    
         var orangeIcon = new L.Icon({
             iconUrl: 'https://maps.google.com/mapfiles/ms/icons/orange-dot.png',
             iconSize: [25, 25],
@@ -273,7 +280,7 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
-
+    
         var greenIcon = new L.Icon({
             iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
             iconSize: [25, 25],
@@ -281,42 +288,46 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
-
+    
         var markers = [];
-
+    
         // 清除地圖上的標記
         function clearMarkers() {
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
         }
-
+    
         // 更新地圖標記
         function updateMarkers() {
             clearMarkers();
-
-            var selectedDistricts = Array.from(document.getElementById('district-select').selectedOptions).map(option => option.value);
+    
+            // 選擇所有區域
+            var districtSelect = document.getElementById('district-select');
+            for (var i = 0; i < districtSelect.options.length; i++) {
+                districtSelect.options[i].selected = true;
+            }
+    
+            var selectedDistricts = Array.from(districtSelect.selectedOptions).map(option => option.value);
             var selectedStatus = Array.from(document.getElementById('statusFilter').selectedOptions).map(option => option.value);
             var total_bike = 0;
             var available = 0;
             var rate = 0;
-            var stationsWithRatio = []
-
+            var stationsWithRatio = [];
+    
             fetch("/bike-stations")
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
                         var lat = station.latitude;
                         var lon = station.longitude;
-                        var stationName = station.sna;  // 站點名稱
-                        var availableBikes = station.available_rent_bikes;  // 可用車輛
-                        var totalSlots = station.total;  // 總車位數
+                        var stationName = station.sna;
+                        var availableBikes = station.available_rent_bikes;
+                        var totalSlots = station.total;
                         var infoTime = station.infoTime;
-
-                        // 計算車輛可用比例
+    
                         var ratio = availableBikes / totalSlots;
                         var icon = null;
-
-                        // 根據車輛可用比例選擇顏色
+    
                         if (ratio < 0.4 && selectedStatus.includes('low')) {
                             icon = redIcon;
                         } else if (ratio >= 0.4 && ratio < 0.75 && selectedStatus.includes('medium')) {
@@ -324,8 +335,7 @@
                         } else if (ratio >= 0.75 && selectedStatus.includes('high')) {
                             icon = greenIcon;
                         }
-
-                        // 篩選多個行政區並添加符合條件的標記
+    
                         if (icon && (selectedDistricts.length === 0 || selectedDistricts.includes(station.sareaen))) {
                             var marker = L.marker([lat, lon], { icon: icon })
                                 .addTo(map)
@@ -334,64 +344,90 @@
                                 <br>可用車輛：${availableBikes} / ${totalSlots}
                                 <br>更新時間: ${infoTime}`);
                             markers.push(marker);
-
+    
                             total_bike += totalSlots;
                             document.querySelector('#total_bike').innerText = total_bike;
-
+    
                             available += availableBikes;
                             document.querySelector('#available').innerText = available;
-
-                            var rate = (available / total_bike) * 100; // Calculate the rate as a percentage
-                            rate = rate.toFixed(2); // Optionally round to 2 decimal places 
-                            document.querySelector('#rate').innerText = rate + '%'; // Append the percentage symbol
-
+    
+                            rate = (available / total_bike) * 100;
+                            rate = rate.toFixed(2);
+                            document.querySelector('#rate').innerText = rate + '%';
+    
                             stationsWithRatio.push({
                                 name: stationName,
-                                ratio: ratio, // Keep ratio as a number, no .toFixed() here
-                                rate: (ratio * 100).toFixed(2) + '%' // This is fine to be a string
+                                ratio: ratio,
+                                rate: (ratio * 100).toFixed(2) + '%'
                             });
                         }
                     });
-
-                    // Sort the stations by numeric ratio, not string
+    
                     stationsWithRatio.sort((a, b) => b.ratio - a.ratio);
-
-                    // Clear and update the demographics list with the sorted stations
+    
                     var demographicsList = document.querySelector('.demographics ul');
-                    demographicsList.innerHTML = ''; // Clear the existing list
-
+                    demographicsList.innerHTML = '';
+    
                     stationsWithRatio.forEach(station => {
                         var listItem = document.createElement('li');
                         listItem.innerHTML = `
                             <span>${station.name}</span>
-                            <span>${station.rate}</span> <!-- Apply toFixed when displaying -->
+                            <span>${station.rate}</span>
                         `;
                         demographicsList.appendChild(listItem);
-                        });
                     });
-                }
-  
+                });
+        }
+    
+        // 顯示使用者的目前位置
+        function showCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        var lat = position.coords.latitude;
+                        var lon = position.coords.longitude;
+    
+                        // 在使用者的位置新增標記
+                        var currentLocationMarker = L.marker([lat, lon]).addTo(map)
+                            .bindPopup('You are here!')
+                            .openPopup();
+    
+                        // 將地圖視野移到使用者位置
+                        map.setView([lat, lon], 15);
+    
+                        // 觸發更新所有站位資訊的功能
+                        updateMarkers();
+                    },
+                    function(error) {
+                        console.log('Error retrieving your location: ', error);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        }
+    
         // 當下拉選單變更時，更新標記
         function updateTime() {
             fetch("/time")
-                .then(response => response.text())  // 解析為純文本
+                .then(response => response.text())
                 .then(time => {
-                    document.querySelector('#time').innerText = time;  // 更新時間到 DOM
+                    document.querySelector('#time').innerText = time;
                 })
                 .catch(error => console.log('Error fetching time:', error));
         }
-
-        // 在頁面載入時更新一次時間
-        document.addEventListener('DOMContentLoaded', updateTime);
+    
+        document.addEventListener('DOMContentLoaded', function() {updateTime();});
         document.getElementById('district-select').addEventListener('change', updateMarkers);
         document.getElementById('statusFilter').addEventListener('change', updateMarkers);
-
+        document.getElementById('current_loc_button').addEventListener('click', showCurrentLocation);
+    
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
+    
         updateMarkers();
     </script>
-
+    
 </body>
 </html>
