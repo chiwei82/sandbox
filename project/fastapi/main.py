@@ -9,17 +9,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))  # 當前文件的目錄
 static_dir = os.path.join(current_dir, "static")  # 靜態文件的路徑
 
-# 掛載靜態文件目錄
 app = FastAPI()
-try:
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
-except:
-    try:
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
-    except:
-        @app.get("/")
-        async def read_index():
-            return FileResponse(os.path.join(static_dir, "index.html"))
 
 # 從新的 API URL 獲取自行車站即時資料
 @app.get("/bike-stations")
@@ -38,3 +28,14 @@ def get_bike_stations():
 @app.get("/time")
 def get_time():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+# 掛載靜態文件目錄
+try:
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+except:
+    try:
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    except:
+        @app.get("/")
+        async def read_index():
+            return FileResponse(os.path.join(static_dir, "index.html"))
