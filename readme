@@ -5,4 +5,20 @@ docker info
 docker build -t my-fastapi-app .
 
 # Step 3 : 執行映像
-docker run -d -p 8080:8080 --name fastapi-container-new my-fastapi-app
+docker run -d -p 8080:8080 --name fastapi-container my-fastapi-app
+
+# 使用 Volumes 映射本地目錄
+docker run -d -p 8080:8080 --name fastapi-container -v /path/to/your/local/files:/workspace/project/fastapi my-fastapi-app
+docker run -d -p 8080:8080 --name fastapi-container -v D:\sandbox_git\project\fastapi my-fastapi-app
+
+# 啟動建立好的映像
+docker start fastapi-container
+
+# 檢查當前運行的容器
+docker ps -a
+
+# 停止容器
+docker stop fastapi-container
+
+# 刪除容器(需先停止容器)
+docker rm -f fastapi-container
