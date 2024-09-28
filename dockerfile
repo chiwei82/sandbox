@@ -1,4 +1,4 @@
-# 基於 Python 3.9 映像
+# 基於 Python 3.10 映像
 FROM python:3.10
 
 # 設置工作目錄，對應 FastAPI 應用的目錄
