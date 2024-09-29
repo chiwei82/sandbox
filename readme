@@ -1,3 +1,4 @@
+## docker 執行
 # Step 1 : 確認目前電腦 docker 正在運行
 docker info
 
@@ -22,3 +23,9 @@ docker stop fastapi-container
 
 # 刪除容器(需先停止容器)
 docker rm -f fastapi-container
+
+## dagster 
+$env:DAGSTER_HOME = "D:/sandbox_git/dagster/dagster_home"
+dagster-daemon run
+cd dagster
+dagster-webserver -w workspace.yaml
