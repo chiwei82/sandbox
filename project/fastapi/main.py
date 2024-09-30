@@ -2,13 +2,10 @@ import requests
 from fastapi import FastAPI
 import pandas as pd
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from datetime import datetime, timedelta
 import os
 # 使用 os.path.join 構建 static 目錄的路徑
-current_dir = os.path.dirname(os.path.abspath(__file__))  # 當前文件的目錄
-static_dir = os.path.join(current_dir, "static")  # 靜態文件的路徑
-
 app = FastAPI()
 
 # 從新的 API URL 獲取自行車站即時資料
@@ -29,13 +26,11 @@ def get_bike_stations():
 def get_time():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# 掛載靜態文件目錄
-try:
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
-except:
-    try:
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
-    except:
-        @app.get("/")
-        async def read_index():
-            return FileResponse(os.path.join(static_dir, "index.html"))
+# 掛載 static 資料夾來提供靜態文件，例如 index.html
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# 根路徑返回 index.html
+@app.get("/", response_class=HTMLResponse)
+async def read_index():
+    with open("static/index.html", "r", encoding="utf-8") as file:
+        return file.read()
