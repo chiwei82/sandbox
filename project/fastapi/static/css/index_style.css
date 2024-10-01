@@ -1,0 +1,213 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fb;
+    margin: 0;
+    padding: 20px;
+}
+#map {
+    height: 600px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+.header h1 {
+    font-size: 24px;
+}
+.header .actions {
+    display: flex;
+    gap: 10px;
+}
+.actions button {
+    padding: 8px 15px;
+    background-color: #6c5dd3;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.stats {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+.stat-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    flex: 1;
+    text-align: center;
+}
+.stat-card h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+.stat-card p {
+    font-size: 16px;
+    color: gray;
+}
+.world-map {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.world-map img {
+    width: 100%;
+    height: auto;
+}
+.demographics {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-height: 600px; /* 設定最大高度 */
+    overflow-y: auto; /* 當內容超出時，垂直滾動 */
+}
+.demographics h2 {
+    font-size: 24px;
+}
+.demographics ul {
+    list-style: none;
+    padding: 0;
+}
+.demographics ul li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.demographics ul li span {
+    font-size: 18px;
+}
+    
+/* MaterializeCSS 的多選下拉選單樣式調整 */
+.select-dropdown {
+    z-index: 9999 !important; /* 確保下拉選單的懸浮視窗總是在最上層 */
+    max-height: 250px !important; /* 設置最大高度，顯示過多時會出現滾動條 */
+    overflow-y: auto !important; /* 滾動條設置 */
+}
+
+.dropdown-content {
+    max-height: 250px !important; /* 設置下拉選單的最大高度 */
+    overflow-y: auto !important; /* 添加垂直滾動條 */
+}
+
+/* 調整 content-wrapper */
+.content-wrapper {
+    display: flex; /* Makes the children (world-map and demographics) align horizontally */
+    gap: 20px; /* Adds some spacing between the two divs */
+
+}
+
+/* 新增父容器來包含 .demographics 和 .search-container，保持同寬 */
+.demographics-search-container {
+    width: 100%; /* 保證 .demographics 和 .search-container 都是 100% 寬 */
+    display: flex;
+    max-width: 350px;
+    flex-direction: column; /* 讓兩者垂直排列 */
+}
+
+.world-map, .demographics{
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    flex: 1; /* Ensures both divs take up equal width */
+}
+
+.station-name {
+    text-decoration: underline;
+    color: black; /* 你可以修改顏色 */
+    cursor: pointer;
+}
+
+.station-name:hover {
+    color: darkblue; /* 滑鼠懸停時的顏色變化 */
+}
+
+/* 搜尋框的樣式 */
+.search-container {
+    width: 100%; /* 保證搜尋框寬度與 content-wrapper 一致 */
+    display: flex;
+    justify-content: center; /* 讓搜尋框水平置中 */
+    margin-top: 15px; 
+}
+
+/* 搜尋框樣式 */
+#station-search {
+    width: 100%; /* 搜尋框的寬度與 .demographics 一致 */
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc; /* 設置適當的邊框 */
+    box-sizing: border-box;
+    background-color: white; /* 確保搜尋框的背景顏色統一 */
+}
+
+/* 移除不必要的陰影 */
+#station-search, .search-container {
+    box-shadow: none; /* 確保沒有陰影 */
+}
+
+/* 下拉列表設置 */
+.autocomplete-list {
+    width: 100%; /* 與輸入框同寬 */
+    max-width: 400px; /* 可選：設置最大寬度 */
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: white;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    z-index: 1000;
+    box-shadow: none; /* 移除陰影 */
+}
+
+.autocomplete-list li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.autocomplete-list li:hover {
+    background-color: #f0f0f0;
+}
+
+/* RWD 設計，針對小螢幕 */
+@media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column; /* 讓 world-map 和 demographics 垂直排列 */
+        align-items: center; /* 讓內容置中對齊 */
+    }
+
+    .world-map, .demographics {
+        width: 100%; /* 讓 world-map 和 demographics 占滿螢幕寬度 */
+        margin-bottom: 20px; /* 每個區塊之間的間距 */
+    }
+
+    .header .actions {
+        flex-direction: column; /* 讓按鈕垂直排列 */
+        gap: 10px; /* 按鈕之間增加間距 */
+    }
+
+    .stats {
+        flex-direction: column; /* 讓 stat-card 垂直排列 */
+        gap: 10px; /* 增加每個 stat-card 之間的間距 */
+    }
+
+    .stat-card {
+        width: 100%; /* 讓每個 stat-card 占滿螢幕寬度 */
+        text-align: center;
+    }
+}

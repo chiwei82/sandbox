@@ -1,0 +1,122 @@
+2024-10-01 00:00:03,577 - INFO - Save Success
+2024-10-01 00:10:04,443 - INFO - Save Success
+2024-10-01 00:20:02,306 - INFO - Save Success
+2024-10-01 00:30:02,927 - INFO - Save Success
+2024-10-01 00:40:02,503 - INFO - Save Success
+2024-10-01 00:50:02,192 - INFO - Save Success
+2024-10-01 01:00:04,239 - INFO - Save Success
+2024-10-01 01:10:02,506 - INFO - Save Success
+2024-10-01 01:20:02,299 - INFO - Save Success
+2024-10-01 01:30:03,354 - INFO - Save Success
+2024-10-01 01:40:02,336 - INFO - Save Success
+2024-10-01 01:50:02,481 - INFO - Save Success
+2024-10-01 02:00:06,231 - INFO - Save Success
+2024-10-01 02:10:02,335 - INFO - Save Success
+2024-10-01 02:20:02,840 - INFO - Save Success
+2024-10-01 02:30:03,426 - INFO - Save Success
+2024-10-01 02:40:02,305 - INFO - Save Success
+2024-10-01 02:50:02,204 - INFO - Save Success
+2024-10-01 03:00:04,412 - INFO - Save Success
+2024-10-01 03:07:57,218 - INFO - Market data Success
+2024-10-01 03:10:02,967 - INFO - Save Success
+2024-10-01 03:10:06,095 - INFO - Market data Success
+2024-10-01 03:20:02,552 - INFO - Save Success
+2024-10-01 03:20:05,707 - INFO - Market data Success
+2024-10-01 03:56:02,047 - INFO - Save Success
+2024-10-01 03:56:04,870 - INFO - Market data Success
+2024-10-01 13:53:19,871 - INFO - Save Success
+2024-10-01 13:53:22,923 - INFO - Market data Success
+2024-10-01 14:30:05,113 - INFO - Save Success
+2024-10-01 14:30:08,477 - INFO - Market data Success
+2024-10-01 15:39:55,083 - INFO - Save Success
+2024-10-01 15:39:58,120 - INFO - Market data Success
+2024-10-01 15:40:02,530 - INFO - Save Success
+2024-10-01 15:40:05,577 - INFO - Market data Success
+2024-10-01 15:50:04,089 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 15:50:04,152 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:00:06,947 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:00:07,000 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:10:03,774 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:10:03,857 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:20:08,519 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:20:08,572 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:30:05,104 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:30:05,155 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:40:02,946 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:40:03,009 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:50:02,828 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 16:50:02,883 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:00:03,609 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:00:03,660 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:10:05,791 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:10:05,853 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:20:02,693 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:20:02,745 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:30:05,303 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:30:05,357 - ERROR - IO Error: File is already open in 
+C:\Users\tonyf\AppData\Local\DBeaver\dbeaver.exe (PID 11384)
+2024-10-01 17:40:03,283 - INFO - Save Success
+2024-10-01 17:40:06,140 - INFO - Market data Success
+2024-10-01 17:50:03,718 - INFO - Save Success
+2024-10-01 17:50:06,553 - INFO - Market data Success
+2024-10-01 18:00:05,792 - INFO - Save Success
+2024-10-01 18:00:08,603 - INFO - Market data Success
+2024-10-01 18:10:02,885 - INFO - Save Success
+2024-10-01 18:10:05,719 - INFO - Market data Success
+2024-10-01 18:20:02,918 - INFO - Save Success
+2024-10-01 18:20:05,808 - INFO - Market data Success
+2024-10-01 18:30:04,386 - INFO - Save Success
+2024-10-01 18:30:07,207 - INFO - Market data Success
+2024-10-01 18:40:03,143 - INFO - Save Success
+2024-10-01 18:40:06,187 - INFO - Market data Success
+2024-10-01 18:50:03,049 - INFO - Save Success
+2024-10-01 18:50:06,033 - INFO - Market data Success
+2024-10-01 19:00:04,745 - INFO - Save Success
+2024-10-01 19:00:07,529 - INFO - Market data Success
+2024-10-01 19:10:02,917 - INFO - Save Success
+2024-10-01 19:10:05,727 - INFO - Market data Success
+2024-10-01 19:20:04,502 - INFO - Save Success
+2024-10-01 19:20:08,324 - INFO - Market data Success
+2024-10-01 19:30:04,911 - INFO - Save Success
+2024-10-01 19:30:07,908 - INFO - Market data Success
+2024-10-01 19:40:02,921 - INFO - Save Success
+2024-10-01 19:40:05,945 - INFO - Market data Success
+2024-10-01 19:50:03,650 - INFO - Save Success
+2024-10-01 19:50:06,983 - INFO - Market data Success
+2024-10-01 20:00:10,230 - INFO - Save Success
+2024-10-01 20:00:13,238 - INFO - Market data Success
+2024-10-01 20:10:05,683 - INFO - Save Success
+2024-10-01 20:10:08,724 - INFO - Market data Success
+2024-10-01 20:20:04,404 - INFO - Save Success
+2024-10-01 20:20:07,756 - INFO - Market data Success
+2024-10-01 20:30:10,860 - INFO - Save Success
+2024-10-01 20:30:14,004 - INFO - Market data Success
+2024-10-01 20:40:03,033 - INFO - Save Success
+2024-10-01 20:40:05,962 - INFO - Market data Success
+2024-10-01 20:50:03,450 - INFO - Save Success
+2024-10-01 20:50:06,397 - INFO - Market data Success
+2024-10-01 21:00:05,740 - INFO - Save Success
+2024-10-01 21:00:08,580 - INFO - Market data Success
+2024-10-01 21:10:03,454 - INFO - Save Success
+2024-10-01 21:10:06,345 - INFO - Market data Success

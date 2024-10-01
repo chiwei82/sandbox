@@ -61,19 +61,9 @@ def get_bike_data():
 
     return df
 
-def main():
-
-    # get_bike_data()
-    df_bike = get_bike_data()
-
-    # get_weather()
-    unique_sareaen = list(df_bike['sareaen'].unique())
-    delayed = [dask.delayed(get_weather)(city_name) for city_name in unique_sareaen]  
-    df_weather = pd.concat(dask.compute(*delayed)) 
-
-    # merge
-    df_bike = df_bike.merge(df_weather, left_on="sareaen", right_on="city",how="left")
-
+def save_raw_data(df_bike):
+    
+    df_bike = df_bike.copy()
     try:
         conn = duckdb.connect(database='warehouse\data_sandbox.duckdb')
         conn.execute("""
@@ -110,6 +100,68 @@ def main():
 
     except Exception as e:
         logger.error(e)
+
+def data_market():
+
+    try:
+        conn = duckdb.connect(database='D:/sandbox_git/warehouse/data_sandbox.duckdb')
+        df = conn.execute(
+            "SELECT * FROM youbike"
+        ).fetch_df()[['sno', 'sna', 'sarea', 'fetch_time', 'latitude', 'longitude', 'available_rent_bikes', 'total', 'temperature', 'description']].sort_values(['sno', 'fetch_time'], ascending=True)
+        
+        conn.close()
+        
+        df["fetch_time"] = pd.to_datetime(df["fetch_time"])
+
+        def calculate_change_rate(group):
+            group['change_rate'] = group['available_rent_bikes'].pct_change().fillna(0)
+            group['time_diff'] = group['fetch_time'].diff().dt.total_seconds() / 60
+            group.loc[group['time_diff'] > 12, 'change_rate'] = 0
+            return group
+
+        df_pct = df.groupby('sno', as_index=False).apply(calculate_change_rate)
+        df_available = df_pct.query("~time_diff.isna()").query("time_diff < 12").query("change_rate != inf")
+        conn = duckdb.connect(database='warehouse\data_sandbox.duckdb')
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS youbike_available (
+                sno VARCHAR,
+                sna VARCHAR,
+                sarea VARCHAR,
+                fetch_time TIMESTAMP,
+                latitude FLOAT,
+                longitude FLOAT,
+                available_rent_bikes INTEGER,
+                total INTEGER,
+                temperature FLOAT,
+                description VARCHAR,
+                change_rate DOUBLE,
+                time_diff DOUBLE
+            );
+        """)
+        conn.execute("""
+            DELETE FROM youbike_available WHERE sno IN (SELECT sno FROM df_available);
+        """)
+        conn.execute("INSERT INTO youbike_available SELECT * FROM df_available")
+        logger.info("Market data Success")
+        conn.close()
+    except Exception as e:
+        logger.error(e)
+
+def main():
+
+    # get_bike_data()
+    df_bike = get_bike_data()
+
+    # get_weather()
+    unique_sareaen = list(df_bike['sareaen'].unique())
+    delayed = [dask.delayed(get_weather)(city_name) for city_name in unique_sareaen]  
+    df_weather = pd.concat(dask.compute(*delayed)) 
+
+    # merge
+    df_bike = df_bike.merge(df_weather, left_on="sareaen", right_on="city",how="left")
+
+    save_raw_data(df_bike)
+    data_market()
 
 if __name__ == "__main__":
     main()
