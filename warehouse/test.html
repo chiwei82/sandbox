@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js 互動範例</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        svg {
+            width: 100%;
+            height: 500px;
+        }
+        .bar {
+            fill: steelblue;
+        }
+        .bar:hover {
+            fill: orange;
+        }
+    </style>
+</head>
+<body>
+    <svg></svg>
+    
+    <script>
+        // 數據集
+        const data = [10, 15, 20, 25, 30, 35];
+
+        // 設定 SVG 畫布的寬度和高度
+        const width = 500;
+        const height = 300;
+
+        // 創建比例尺
+        const xScale = d3.scaleBand()
+            .domain(data.map((d, i) => i))
+            .range([0, width])
+            .padding(0.1);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(data)])
+            .range([height, 0]);
+
+        // 創建 SVG
+        const svg = d3.select("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // 創建柱狀圖
+        svg.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", d => yScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d))
+            .on("mouseover", function(event, d) {
+                d3.select(this).attr("fill", "orange"); // 懸停改變顏色
+            })
+            .on("mouseout", function(event, d) {
+                d3.select(this).attr("fill", "steelblue"); // 鼠標移出恢復顏色
+            })
+            .on("click", function(event, d) {
+                console.log("點擊的值是：" + d); // 點擊輸出數據
+            });
+
+    </script>
+</body>
+</html>

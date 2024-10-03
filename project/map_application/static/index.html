@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>台北市公共自行車站點地圖</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 引入 Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- 引入 MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+
+    <!-- 引入 Materialize CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@materializecss/materialize@2.1.0/dist/css/materialize.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@materializecss/materialize@2.1.0/dist/js/materialize.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems, {});
+        });
+    </script>
+
+    <meta charset="utf-8">
+    <title>Dynamic Map Demo</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script type="text/javascript" src="//unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
+    <link href="//unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demographics Report</title>
+    <link rel="stylesheet" href="/static/css/index_style.css">
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Demographics Report</h1>
+            
+            <div class="actions">
+                <button>
+                    <div id="controls-status">
+                        <label for="statusFilter">車輛狀態(多選) :</label>
+                        <select id="statusFilter" name="statusFilter" multiple>
+                            <option value="low">可用車輛少於 40%</option>
+                            <option value="medium"selected>可用車輛 40% - 75%</option>
+                            <option value="high"selected>可用車輛多於 75%</option>
+                        </select>
+                    </div>
+                </button>
+                <button>
+                    <div id="controls" class="input-field col s12">
+                        <select id="district-select" multiple>
+                            <option value="" disabled>選擇行政區</option>
+                            <option value="Daan Dist." selected>大安區</option>
+                            <option value="Datong Dist"selected>大同區</option>
+                            <option value="Shilin Dist"selected>士林區</option>
+                            <option value="Wenshan Dist"selected>文山區</option>
+                            <option value="Zhongzheng Dist"selected>中正區</option>
+                            <option value="Zhongshan Dist"selected>中山區</option>
+                            <option value="Neihu Dist"selected>內湖區</option>
+                            <option value="Beitou Dist" selected>北投區</option>
+                            <option value="Songshan Dist"selected >松山區</option>
+                            <option value="Nangang Dist"selected>南港區</option>
+                            <option value="Xinyi Dist"selected>信義區</option>
+                            <option value="Wanhua Dist"selected>萬華區</option>
+                            <option value="NTU Dist"selected>台大學區</option>
+                        </select>
+                        <label for="district-select">區域選擇(多選) :</label>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                
+                <h2 id="total_bike"></h2> <!-- The value of total_bike will be displayed here -->
+                
+                <p>Total Bike 🚲</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="available"></h2>
+                <p>Available Bike 🉑</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="rate"></h2>
+                <p>Total Rate 🔢</p>
+            </div>
+            <div class="stat-card">
+                <h5 id = "time"></h5>
+                <p>Update Time ⏰</p>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="float: left;"> Map 😼</h4>
+                    <a id="show_all" style="float: right;" tabindex="0" class="btn elevated rounded pulse">show all station ℹ️</a>
+                </div>
+        
+                <div id="map"></div>
+            </div>
+        
+            <!-- 這裡是 .demographics 和搜尋框同時在 content-wrapper 裡面 -->
+            <div class="demographics-search-container">
+                <div class="demographics">
+                    <h4>Bike Station Availability Ranking🏝️</h4>
+                    <ul>
+                        <!-- Dynamically populated list will appear here -->
+                    </ul>
+                </div>
+        
+                <!-- 搜尋框放置在 .demographics 正下方 -->
+                <div class="search-container">
+                    <input type="text" id="station-search" placeholder="輸入站名(僅顯示有選取到的ubike站)🐾" />
+                    <ul id="search-results" class="autocomplete-list"></ul> <!-- 顯示匹配結果 -->
+                </div>
+            </div>
+        </div>
+        
+    <script src="/static/js/index.js"></script>
+    
+</body>
+</html>

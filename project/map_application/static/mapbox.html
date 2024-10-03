@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>real time data (mapbox)</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 引入 Mapbox GL -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
+
+    <!-- 引入 Mapbox compare -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.css" type="text/css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* 讓 body 高度填滿視窗 */
+            display: flex;
+        }
+        /* 設置地圖和圖表容器的 flex 佔比 */
+        #map_container {
+            width: 75%; /* 左半邊佔 75% */
+            height: 100%;
+            position: relative; /* 保證按鈕能放置在地圖上 */
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            position: absolute; /* 保證地圖佔滿 map_container */
+            top: 0;
+            left: 0;
+        }
+
+        .map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #chart {
+            width: 25%;
+            height: 100%;
+            background-color: #E5DDC5 ;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;     
+            text-align: center;      
+        }
+        /* Optional styling for your application */
+        #refreshButton {
+            padding: 10px 20px;
+            background-color: #007cbf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        #refreshButton:hover {
+            background-color: #005f8f;
+        }
+
+        /* 加載動畫樣式 */
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* 左下標籤 */
+        .label-left {
+            position: absolute;
+            bottom: 160px;
+            left: 260px;
+            padding: 5px 10px;
+            background-color: rgba(79, 74, 74, 0.8);
+            border-radius: 3px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #eeeeee;
+        }
+
+        /* 右下標籤 */
+        .label-right {
+            position: absolute;
+            bottom: 160px;
+            right: 260px;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="map_container">
+        
+
+        <div id="comparison-container">
+            <div id="before" class="map"></div>
+            <div id="after" class="map"></div>
+        </div>
+
+        <!-- 左下標籤 -->
+        <div class="label-left">週間🏢</div>
+
+        <!-- 右下標籤 -->
+        <div class="label-right">週末🖼️</div>
+    </div>
+   
+
+    <div id="chart">
+        <h1>2023年 7月 Path Heatmap📍</h1>
+        <h3>每個行政區隨機抽樣 30% 的路線交易量(雙邊)</h3>
+        <button id="refreshButton">refresh sample(30%)</button>
+    </div>
+
+    <script src="/static/js/mapbox.js"></script>
+    <script>
+       document.getElementById("refreshButton").addEventListener("click", function() {
+        var button = document.getElementById("refreshButton");
+
+        // 清空按鈕內容，顯示加載動畫和 loading 文本，並將背景變為紅色
+        button.innerHTML = '<div class="spinner"></div>Loading...';
+        button.style.backgroundColor = '#FF0000';  // 背景變為紅色
+        button.disabled = true;  // 禁用按鈕防止多次點擊
+
+        // 發送 GET 請求到 FastAPI 後台
+        fetch("/mapbox/refresh_weekend_route_sample/0.3")
+            .then(response => {
+                if (response.status === 200) {
+                    return response.json();  // 確認狀態為200 OK
+                } else {
+                    throw new Error("Request failed");
+                }
+            })
+            .then(data => {
+                // 當後台處理完成後顯示 "Done!"，並將背景變為綠色
+                button.innerHTML = 'Done!';
+                button.style.backgroundColor = '#00FF00';  // 背景變為綠色
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                button.innerHTML = 'Error!';  // 如果發生錯誤顯示 "Error!"
+            })
+            .finally(() => {
+                // 在1秒後恢復按鈕為初始狀態
+                setTimeout(() => {
+                    button.innerHTML = 'refresh sample(30%)';
+                    button.style.backgroundColor = '#007cbf';  // 恢復按鈕初始顏色
+                    button.disabled = false;  // 恢復按鈕點擊功能
+                }, 5000);
+                setTimeout(() => {
+                    window.location.reload();  // 刷新網頁
+                }, 1000);
+            });
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>map(leaflet)</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 引入 Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- 引入 D3-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+        }
+
+        #map {
+            width: 55%;
+            height: 100%;
+        }
+
+        #chart {
+            width: 45%;
+            height: 100%;
+            background-color: #BED7DC ;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #button-container {
+            text-align: right;   /* 讓按鈕靠右對齊 */
+            margin-bottom: 10px; /* 按鈕容器與地圖之間增加一點距離 */
+        }
+
+        .toggle-btn {
+            font-size: 18px;      /* 讓按鈕文字變大 */
+            padding: 10px 20px;   /* 增加內邊距，讓按鈕變大 */
+            margin-left: 10px;    /* 讓按鈕之間有間距 */
+            cursor: pointer;      /* 讓鼠標變成指針 */
+        }
+
+        /* 可選：按鈕 hover 時增加變化 */
+        .toggle-btn:hover {
+            background-color: #f0f0f0;
+            border-color: #ccc;
+        }
+        /* Optional styling for your application */
+
+        /* leaflet */
+        .label-style {
+            font-size: 14px;
+            font-weight: bold;
+            color: black;
+            background: none;
+            border: none;
+            text-shadow: 1px 1px 2px white;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+   
+    <div id="chart">
+        <div>
+            <div style="text-align: center;">
+                <h1>2023年 7月 路線交易量(單邊)</h1>
+            </div>
+            
+            <div id="line_chart"></div>
+            <div id="bar_chart"></div>
+            <div id="button-container">
+                <button id="weekdayBtn" class="toggle-btn">週間</button>
+                <button id="weekendBtn" class="toggle-btn">週末</button>
+            </div>
+        </div>
+    </div>
+     
+    <div id="map">
+        <!-- 地圖容器 -->
+    </div>
+    <script src="/static/js/leaflet.js"></script>
+</body>
+</html>
