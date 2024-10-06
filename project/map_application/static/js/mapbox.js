@@ -16,26 +16,34 @@ function createMap(containerId, style, fetchPath) {
         fetch(fetchPath)
           .then(response => response.json())
           .then(data => {
+            // 從 GeoJSON 中提取所有的 sum_of_txn_times
+            const sumOfTxnTimesArray = data.features.map(feature => feature.properties.sum_of_txn_times);
+
+            // 獲取最大值
+            const maxSumOfTxnTimes = Math.max(...sumOfTxnTimesArray);
+
+            console.log(containerId + " -> maxSumOfTxnTimes = " + maxSumOfTxnTimes);
+
             // 加載 GeoJSON 資料
-            map.addSource('week_route', {
+            map.addSource('route_data', {
               'type': 'geojson',
-              'data': data // 直接將 API 返回的 GeoJSON 資料作為 source
+              'data': data
             });
       
             // 添加熱力圖圖層
             map.addLayer({
               'id': 'bike-heatmap',
               'type': 'heatmap',
-              'source': 'week_route',  // 資料來源
-              'maxzoom': 18,  // 設置最大縮放級別
+              'source': 'route_data', 
+              'maxzoom': 18, 
               'paint': {
                 // 設置熱力圖的權重，根據 sum_of_txn_times 的值動態調整
                 'heatmap-weight': [
                   'interpolate',
                   ['linear'],
-                  ['get', 'sum_of_txn_times'], // 使用 sum_of_txn_times
-                  1, 0,    // 當 sum_of_txn_times = 1 時，權重為 0（最小值）
-                  3328, 1  // 當 sum_of_txn_times = 3328（最大值），權重為 1
+                  ['get', 'sum_of_txn_times'],
+                  1, 0,    
+                  maxSumOfTxnTimes, 1  
                 ],
                 // 設置熱力圖的強度，根據地圖縮放級別動態調整
                 'heatmap-intensity': [
@@ -84,7 +92,7 @@ function createMap(containerId, style, fetchPath) {
 
 // 創建兩個不同的地圖實例，並分別加載不同的 GeoJSON 數據
 var beforeMap = createMap('before', 'mapbox://styles/mapbox/streets-v11', '/mapbox/week_route');
-var afterMap = createMap('after', 'mapbox://styles/mapbox/satellite-v9', '/mapbox/weekend_route');
+var afterMap = createMap('after', 'mapbox://styles/mapbox/outdoors-v12', '/mapbox/weekend_route');
 
 // A selector or reference to HTML element
 const container = '#comparison-container';

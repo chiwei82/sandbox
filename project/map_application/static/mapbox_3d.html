@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Mapbox GL JS v3</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 引入 Mapbox GL -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
+        /* 可選: 加入過渡效果讓氣泡變化更平滑 */
+        .custom-marker {
+            border-radius: 50%;
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id='map'></div>
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpYm55IiwiYSI6ImNrcWtjMDg0NjA0anQyb3RnZnl0cDJkYmYifQ.hqyJUg0ZRzAZbcJwkfs0bQ';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        center: [121.545472, 25.048806],
+        zoom:16, 
+        pitch: 50,
+        bearing: -30, 
+    });
+
+    map.on('style.load', () => {
+        map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+        map.setConfigProperty('basemap', 'showRoadLabels', false);
+    });
+
+    function getIconSize(ratio) {
+        // 根據自行車可用比例設置氣泡大小（範圍 10px 到 50px）
+        const minSize = 10;
+        const maxSize = 50;
+        return Math.max(minSize, ratio * maxSize);
+    }
+
+    function getIconColor(ratio) {
+        if (ratio <= 0.4) {
+            return 'red'; 
+        } else if (ratio <= 0.75) {
+            return 'orange'; 
+        } else {
+            return 'green';
+        }
+    }
+
+    fetch("/bike-stations")
+        .then(response => response.json())
+        .then(data => {
+
+            const geojson = {
+                'type': 'FeatureCollection',
+                'features': data.map(station => ({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [station.longitude, station.latitude]
+                    },
+                    'properties': {
+                        'sna': station.sna,
+                        'availableBikes': station.available_rent_bikes, 
+                        'ratio': station.available_rent_bikes / station.total,
+                        'infotime': station.infoTime
+                    }
+                }))
+            };
+
+            geojson.features.forEach(function (marker) {
+                var el = document.createElement('div');
+                el.className = 'custom-marker';
+                
+                // 動態設置氣泡大小和顏色
+                const size = getIconSize(marker.properties.ratio);
+                el.style.width = `${size}px`; 
+                el.style.height = `${size}px`; 
+                el.style.backgroundColor = getIconColor(marker.properties.ratio);
+                el.style.opacity = 0.7; // 可選：增加透明度讓氣泡不太突兀
+                el.style.borderRadius = '50%'; // 確保標記是圓形
+
+                // 創建地圖標記
+                var mapMarker = new mapboxgl.Marker(el)
+                    .setLngLat(marker.geometry.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 })
+                    .setHTML(`
+                    <h2>${marker.properties.sna}</h2>
+                    <h3>Available Bikes: ${marker.properties.availableBikes}</h3>
+                    <p>info_time: ${marker.properties.infotime}</p>`))
+                    .addTo(map);
+
+                // 為每個標記添加點擊事件
+                el.addEventListener('click', () => {
+                    map.flyTo({
+                        center: marker.geometry.coordinates,
+                        zoom: 18,
+                        speed: 10,
+                        curve: 0.1
+                    });
+                });
+            }); 
+        })
+        .catch(error => console.error('Error fetching bike station data:', error));
+
+        map.on('mouseenter', 'custom-marker', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'custom-marker', () => {
+            map.getCanvas().style.cursor = '';
+        });
+
+    </script>
+    
+   
+</body>
+</html>

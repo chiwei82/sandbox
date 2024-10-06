@@ -28,7 +28,7 @@
         }
 
         .iframe-container div {
-            height: 911px;  /* 固定高度 */
+            height: 1080px;  /* 固定高度 */
             width: 100%;     /* 寬度 100% */
         }
 
@@ -87,16 +87,26 @@
 
     <!-- 這是包含 iframe 的主容器 -->
     <div class="iframe-container">
+
+        <h1 style="text-align: center;">How is the station distribution?</h1>
         <div>
             <iframe src="/index" style="border:none;"></iframe>
         </div>
 
+        <h1 style="text-align: center;">Is there any difference between Weekday and Weekend?</h1>
         <div>
             <iframe src="/mapbox" style="border:none;"></iframe>
         </div>
 
+        <h1 style="text-align: center;">How people travel with Youbike?</h1>
         <div>
             <iframe src="/leaflet" style="border:none;"></iframe>
+        </div>
+
+        
+        <h1 style="text-align: center;">The point of interest in the city🐦</h1>
+        <div>
+            <iframe src="/poi" style="border:none;"></iframe>
         </div>
         
     </div>

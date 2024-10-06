@@ -97,7 +97,7 @@ Promise.all([
     const paths = features.map(feature => feature.properties.paths);
 
     const margin = { top: 60, right: 100, bottom: 30, left:100 };
-    const width = 800 - margin.left - margin.right;
+    const width = 1000 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
     // Create the SVG element within the #line_chart div
@@ -172,7 +172,7 @@ Promise.all([
         .attr("y1", d => yScale(d))
         .attr("y2", d => yScale(d))
         .attr("stroke", "black")
-        .attr("stroke-width", 1)
+        .attr("stroke-width", 0.2)
         .attr("stroke-dasharray", "4 4");
 
     // Create a tooltip div that is hidden by default
@@ -291,10 +291,9 @@ Promise.all([
         info.update();
     }
     
-    //d3 bar
-    const margin_bar = { top: 20, right: 30, bottom: 240, left: 150 };
-    const width_bar = 800 - margin_bar.left - margin_bar.right;
-    const height_bar = 400 - margin_bar.top - margin_bar.bottom;
+    const margin_bar = { top: 20, right: 100, bottom: 60, left: 300 };
+    const width_bar = 1000 - margin_bar.left - margin_bar.right;
+    const height_bar = 500 - margin_bar.top - margin_bar.bottom;
 
     // 創建 SVG 容器並附加到 <div id="bar_chart">
     const svg_bar = d3.select("#bar_chart").append("svg")
@@ -310,70 +309,60 @@ Promise.all([
         name: d.properties.district_name
     }));
 
-    // 設置 X 軸比例尺（序數類型）
-    const xScale_bar = d3.scaleBand()
-        .domain(processedData.map(d => d.stop_combination))
-        .range([0, width_bar])
-        .padding(0.2);
-
-    // 設置 Y 軸比例尺
-    const yScale_bar = d3.scaleLinear()
+    // 設置 X 軸比例尺（線性類型）
+    const xScale_bar = d3.scaleLinear()
         .domain([0, d3.max(processedData, d => d.txn_times)]) 
         .nice()
-        .range([height_bar, 0]);
+        .range([0, width_bar]);
+
+    // 設置 Y 軸比例尺（序數類型）
+    const yScale_bar = d3.scaleBand()
+        .domain(processedData.map(d => d.stop_combination))
+        .range([0, height_bar])
+        .padding(0.2);
 
     // 繪製 X 軸
     svg_bar.append("g")
         .attr("transform", `translate(0,${height_bar})`)
-        .call(d3.axisBottom(xScale_bar))
-        .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("transform", "rotate(-45)")  
+        .call(d3.axisBottom(xScale_bar).ticks(5))  // 調整刻度
         .style("font-size", "12px");
 
     // 繪製 Y 軸
     svg_bar.append("g")
-        .call(d3.axisLeft(yScale_bar));
-
-    const barCount = processedData.length;
-    svg_bar.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(0)")
-        .attr("x", -height_bar / 1.3)  
-        .attr("y", 15)
-        .style("font-size", "16px")
-        .style("font-weight", "bold")
-        .text(`🔝前${barCount}路線`);
+        .call(d3.axisLeft(yScale_bar))
+        .selectAll("text")
+        .style("font-size", "12px");
 
     // 繪製條形圖
     svg_bar.selectAll(".bar")
         .data(processedData)
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", d => xScale_bar(d.stop_combination))
-        .attr("y", height_bar)
-        .attr("width", xScale_bar.bandwidth())
-        .attr("height", 0) 
+        .attr("y", d => yScale_bar(d.stop_combination))
+        .attr("x", 0)  
+        .attr("height", yScale_bar.bandwidth())
+        .attr("width", 0) 
         .attr("fill", "steelblue")
         .transition() 
         .duration(800) 
-        .attr("y", d => yScale_bar(d.txn_times)) 
-        .attr("height", d => height_bar - yScale_bar(d.txn_times)); 
+        .attr("width", d => xScale_bar(d.txn_times));  
 
+    // 添加標籤
     svg_bar.selectAll(".label")
         .data(processedData)
         .enter().append("text")
         .attr("class", "label")
-        .attr("x", d => xScale_bar(d.stop_combination) + xScale_bar.bandwidth() / 2)
-        .attr("y", height_bar) 
-        .attr("text-anchor", "middle")
-        .text(d => d.txn_times)
+        .attr("y", d => yScale_bar(d.stop_combination) + yScale_bar.bandwidth() / 2 + 5) 
+        .attr("x", 0) 
+        .attr("text-anchor", "start")
+        .text(d => d.txn_times + " -> " + d.name )
         .style("opacity", 0)  
         .style("font-size", "12px")
         .transition()
-        .duration(800)  
-        .attr("y", d => yScale_bar(d.txn_times) - 5)  
-        .style("opacity", 1); 
+        .duration(800)
+        .attr("x", d => xScale_bar(d.txn_times) + 5)  
+        .style("opacity", 1);
+
     })
 
 }

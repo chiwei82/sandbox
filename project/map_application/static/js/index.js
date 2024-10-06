@@ -173,7 +173,7 @@ document.getElementById('statusFilter').addEventListener('change', function() {
     updateMarkers();
 });
 
-document.getElementById('show_all').addEventListener('click', show_all);
+// document.getElementById('show_all').addEventListener('click', show_all);
 
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

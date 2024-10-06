@@ -43,14 +43,14 @@
 
     <div class="container">
         <div class="header">
-            <h1>Demographics Report</h1>
+            <h1>Real time Report</h1>
             
             <div class="actions">
                 <button>
                     <div id="controls-status">
                         <label for="statusFilter">車輛狀態(多選) :</label>
                         <select id="statusFilter" name="statusFilter" multiple>
-                            <option value="low">可用車輛少於 40%</option>
+                            <option value="low"selected>可用車輛少於 40%</option>
                             <option value="medium"selected>可用車輛 40% - 75%</option>
                             <option value="high"selected>可用車輛多於 75%</option>
                         </select>
@@ -105,7 +105,7 @@
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="float: left;"> Map 😼</h4>
-                    <a id="show_all" style="float: right;" tabindex="0" class="btn elevated rounded pulse">show all station ℹ️</a>
+                    <a id="show_all" style="float: right;" tabindex="0" class="btn elevated rounded pulse" href="/mapbox_3d">See data in 3D🐸</a>
                 </div>
         
                 <div id="map"></div>

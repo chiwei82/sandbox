@@ -27,12 +27,12 @@
         }
 
         #map {
-            width: 55%;
+            width: 40%;
             height: 100%;
         }
 
         #chart {
-            width: 45%;
+            width: 60%;
             height: 100%;
             background-color: #BED7DC ;
             display: flex;
@@ -97,6 +97,11 @@
 </head>
 <body>
    
+    <div id="map"></div>
+        <!-- 地圖容器 -->
+    </div>
+    
+
     <div id="chart">
         <div>
             <div style="text-align: center;">
@@ -104,6 +109,8 @@
             </div>
             
             <div id="line_chart"></div>
+            <hr style="border: 1px solid black;" />
+            <h3 style="text-align: center; margin-top: 20px; margin-bottom: 10px;">路線排名</h3>
             <div id="bar_chart"></div>
             <div id="button-container">
                 <button id="weekdayBtn" class="toggle-btn">週間</button>
@@ -111,10 +118,7 @@
             </div>
         </div>
     </div>
-     
-    <div id="map">
-        <!-- 地圖容器 -->
-    </div>
+    
     <script src="/static/js/leaflet.js"></script>
 </body>
 </html>

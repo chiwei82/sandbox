@@ -15,6 +15,9 @@ app = FastAPI()
 # index.html
 @app.get("/bike-stations")
 def get_bike_stations():
+    """
+    抓取台北市公共自行車即時資訊
+    """
     url = "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
     response = requests.get(url)
     data = response.json()
@@ -28,16 +31,34 @@ def get_bike_stations():
 
 @app.get("/time")
 def get_time():
+    """
+    獲取現在時間
+    """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # leaflet.html
 @app.get("/weather/{city_name}")
 def get_weather(city_name: str):
+    """
+    抓取地點天氣: 參數 -> 城市名稱
+    """
     return bike_weather(city_name, json=True)
+
+@app.get("/country_moi")
+def get_country_moi():
+    """
+    回傳 "台灣" 的 GeoJSON
+    """
+    with open(r"static\geojson\COUNTY_MOI_1130718.json", "r", encoding="utf-8") as geojson_file:
+        geojson_data = json.load(geojson_file)
+
+    return geojson_data
 
 @app.get("/geojson")
 def load_geojson():
-    
+    """
+    回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間) 以便繪圖使用
+    """
     with open("static\geojson\OSM_DATA.geojson", "r", encoding="utf-8") as geojson_file:
         geojson_data = json.load(geojson_file)
 
@@ -45,6 +66,9 @@ def load_geojson():
 
 @app.get("/geojson_weekend")
 def load_geojson_weekend():
+    """
+    回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間) 以便繪圖使用
+    """
     
     with open("static\geojson\OSM_DATA_weekend.geojson", "r", encoding="utf-8") as geojson_file:
         geojson_data = json.load(geojson_file)
@@ -52,9 +76,11 @@ def load_geojson_weekend():
     return geojson_data
 
 @app.get("/top_ten_routes")
-def return_top_ten():
-    
-    top = pd.read_csv(r"D:\sandbox_git\warehouse\insight\週間起訖站點統計_cleaned.csv")\
+def return_top_tY():
+    """
+    回傳 站點使用量 (週間) 前 20 站點
+    """
+    top = pd.read_csv(r"static\data\週間起訖站點統計_cleaned.csv")\
         .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
         .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
                    'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
@@ -75,9 +101,11 @@ def return_top_ten():
     return to_return
 
 @app.get("/top_ten_routes_weekend")
-def return_top_ten():
-    
-    top = pd.read_csv(r"D:\sandbox_git\warehouse\insight\週末起訖站點統計_cleaned.csv")\
+def return_top_tY():
+    """
+    回傳 站點使用量 (週末) 前 20 站點
+    """
+    top = pd.read_csv(r"static\data\週末起訖站點統計_cleaned.csv")\
         .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
         .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
                    'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
@@ -99,7 +127,9 @@ def return_top_ten():
 
 @app.get("/mapbox/week_route")
 def return_week_route():
-    
+    """
+    讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
+    """ 
     with open(r"static\geojson\week_route.geojson", "r", encoding="utf-8") as geojson_file:
         to_return = json.load(geojson_file)
 
@@ -107,7 +137,9 @@ def return_week_route():
 
 @app.get("/mapbox/weekend_route")
 def return_week_route():
-    
+    """
+    讀取 SAMPLED WEEKend ROUTE 並回傳 GeoJSON
+    """ 
     with open(r"static\geojson\weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
         to_return = json.load(geojson_file)
 
@@ -115,13 +147,16 @@ def return_week_route():
 
 @app.get("/mapbox/refresh_weekend_route_sample/{frac}")
 def refresh_weekend_route_sample(frac: float = 0.3):
+    """
+    將間起訖站點統計進行隨機抽樣並將 GeoJSON 存成新檔案
+    """
     try:
         # 周末
-        WEEK_LOC = r'D:\sandbox_git\warehouse\週間起訖站點統計_202307.geojson'
-        WEEK_OUTPUT = r"D:\sandbox_git\project\map_application\static\geojson\week_route.geojson"
+        WEEK_LOC = r'static\data\週間起訖站點統計_202307.geojson'
+        WEEK_OUTPUT = r"static\geojson\week_route.geojson"
 
-        WEEKEND_LOC = r'D:\sandbox_git\warehouse\週末起訖站點統計_202307.geojson'
-        WEEKEND_OUTPUT = r"D:\sandbox_git\project\map_application\static\geojson\weekend_route.geojson"
+        WEEKEND_LOC = r'static\data\週末起訖站點統計_202307.geojson'
+        WEEKEND_OUTPUT = r"static\geojson\weekend_route.geojson"
 
         def movement(FILE_LOC,WEEKEND_OUTPUT, frac = 0.3):
 
@@ -142,7 +177,7 @@ def refresh_weekend_route_sample(frac: float = 0.3):
         return f"{frac} random sampled has been refreshed. status: 200 ok"
     except Exception as e:
         return str(e)
-    
+
 # 路由設定
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -164,4 +199,19 @@ async def read_mapbox():
 @app.get("/leaflet", response_class=HTMLResponse)
 async def read_mapbox():
     with open("static/leaflet.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/mapbox_3d", response_class=HTMLResponse)
+async def read_mapbox():
+    with open("static/mapbox_3d.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/d3", response_class=HTMLResponse)
+async def read_mapbox():
+    with open("static/d3_.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/poi", response_class=HTMLResponse)
+async def read_mapbox():
+    with open("static/POI.html", "r", encoding="utf-8") as file:
         return file.read()
