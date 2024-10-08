@@ -5,8 +5,7 @@ FROM python:3.10
 WORKDIR /workspace/project/fastapi
 
 # 複製項目相關文件夾到容器中
-COPY ./project/fastapi /workspace/project/fastapi
-COPY ./myproject /workspace/myproject
+COPY ./project/map_application /workspace/project/map_application
 COPY ./requirements.txt /workspace/
 
 # 安裝依賴，確保在正確目錄下

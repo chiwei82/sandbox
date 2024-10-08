@@ -143,7 +143,7 @@ body {
     width: 100%; /* 保證搜尋框寬度與 content-wrapper 一致 */
     display: flex;
     justify-content: center; /* 讓搜尋框水平置中 */
-    margin-top: 15px; 
+    margin-bottom: 15px; 
 }
 
 /* 搜尋框樣式 */

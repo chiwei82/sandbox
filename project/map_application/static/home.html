@@ -4,112 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page🏡</title>
+    <!-- fullPage.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.1.2/fullpage.min.css" />
     <style>
-        /* 確保 body 和 html 高度填滿視窗 */
-        html, body {
+        body, html {
             margin: 0;
             padding: 0;
             width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
         }
 
-        .center-container {
-            display: flex;
-            justify-content: center;  /* 水平居中 */
-            align-items: center;      /* 垂直居中 */
-            height: 100vh;            /* 占滿整個視窗高度 */
-            background-color: #f5f5f5; /* 可選背景色 */
+        h1 {
+            text-align: center;
         }
 
-        /* 設置父容器來排列子元素 */
-        .iframe-container {
+        .section {
             display: flex;
             flex-direction: column;
-            width: 100%;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
 
-        .iframe-container div {
-            height: 1080px;  /* 固定高度 */
-            width: 100%;     /* 寬度 100% */
-        }
-
-        /* iframe 佔滿其父 div 的空間 */
         iframe {
             width: 100%;
-            height: 100%;
+            height: 911px; /* Minimum height set to 911px */
             border: none;
         }
 
-        /* 父容器使用 flexbox 佈局，讓兩個 iframe 並排顯示 */
-        .iframe-container-left-right {
-            display: flex;
-            width: 100%;  /* 讓容器佔滿頁面寬度 */
-            height: 911px;
-        }
-
-        /* 通用 iframe 樣式設置 */
-        .iframe-container-left-right iframe {
-            height: 100%;  /* 讓 iframe 高度佔滿父容器 */
-            border: none;  /* 移除邊框 */
-        }
-
-        /* mapbox iframe 顯示左半部分 */
-        .iframe-mapbox {
-            width: 50%;  /* 讓它只顯示 50% 寬度 */
-            overflow: hidden;  /* 隱藏其他部分 */
-            position: relative;
-        }
-
-        .iframe-mapbox iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 200%; /* 將其寬度設置為 200%，以便能只顯示左半邊 */
-            height: 100%;
-        }
-
-        /* leaflet iframe 顯示右半部分 */
-        .iframe-leaflet {
-            width: 50%;  /* 讓它只顯示 50% 寬度 */
-            overflow: hidden;  /* 隱藏其他部分 */
-            position: relative;
-        }
-
-        .iframe-leaflet iframe {
-            position: absolute;
-            top: 0;
-            right: 0;  /* 從右側開始顯示 */
-            width: 200%; /* 將其寬度設置為 200%，以便能只顯示右半邊 */
-            height: 100%;
+        /* Ensures iframe height expands if the viewport is taller */
+        @media (min-height: 911px) {
+            iframe {
+                height: 100vh; /* Fill the entire viewport height if taller */
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- 這是包含 iframe 的主容器 -->
-    <div class="iframe-container">
-
-        <h1 style="text-align: center;">How is the station distribution?</h1>
-        <div>
-            <iframe src="/index" style="border:none;"></iframe>
-        </div>
-
-        <h1 style="text-align: center;">Is there any difference between Weekday and Weekend?</h1>
-        <div>
-            <iframe src="/mapbox" style="border:none;"></iframe>
-        </div>
-
-        <h1 style="text-align: center;">How people travel with Youbike?</h1>
-        <div>
-            <iframe src="/leaflet" style="border:none;"></iframe>
-        </div>
-
-        
-        <h1 style="text-align: center;">The point of interest in the city🐦</h1>
-        <div>
-            <iframe src="/poi" style="border:none;"></iframe>
-        </div>
-        
+<div id="fullpage">
+    <div class="section">
+        <h1 style="
+        position: absolute;
+        top: 35%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 9em;
+        padding: 10px 20px;
+        z-index: 9999;
+        text-shadow: 2px 2px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black;">台北市Youbike用戶使用輪廓</h1>
+        <img src="/static/bike_change_rate_map.gif"style="filter: brightness(40%);width: 100%;">
     </div>
+
+    <div class="section">
+        <h1>How is the station distribution?</h1>
+        <iframe src="/distribute"></iframe>
+    </div>
+
+    <div class="section">
+        <h1>Is there any difference between Weekday and Weekend?</h1>
+        <iframe src="/mapbox"></iframe>
+    </div>
+
+    <div class="section">
+        <h1>How do people travel with Youbike?</h1>
+        <iframe src="/leaflet"></iframe>
+    </div>
+
+    <div class="section">
+        <h1>The riden fee generated?</h1>
+        <iframe src="/bike_routes_map"></iframe>
+    </div>
+
+    <div class="section">
+        <h1>見車率</h1>
+        <p>根據YouBike即時資訊回傳資料計算，見車率越高代表某站越少無車可借的情況。具體來說，見車率定義為某站當天若有正常營運，在06:00~23:59間站上至少有1台車的時間比例。90%以上為高見車率；60%~90%為中見車率；60%以下為低見車率</p>
+         <!-- Horizontal slides for 見車率 iframes -->
+         <div class="fp-slides">
+            <div class="slide">
+                <iframe src="/見車率"></iframe>
+            </div>
+            <div class="slide">
+                <iframe src="/見車率_0930"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1>Appendex</h1>
+        <iframe src="/index"></iframe>
+    </div>
+
+</div>
+
+<!-- fullPage.js JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.1.2/fullpage.min.js"></script>
+<script>
+    new fullpage('#fullpage', {
+        autoScrolling: true,
+        navigation: true,
+        anchors: ["intro",'station-distribution', 'weekday-weekend', 'travel-pattern',  'fee','見車率', "Appendex","last word"],
+        navigationTooltips: ["intro🔝",'Station Distribution🗺️', 'Weekday vs Weekend🖼️', 'Travel Pattern🚲',  'fee💲','見車率👁️',"Appendex","last word"],
+        showActiveTooltip: true,
+        scrollingSpeed: 700
+    });
+</script>
 
 </body>
 </html>

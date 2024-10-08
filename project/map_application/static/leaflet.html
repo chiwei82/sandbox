@@ -27,12 +27,12 @@
         }
 
         #map {
-            width: 40%;
+            width: 35%;
             height: 100%;
         }
 
         #chart {
-            width: 60%;
+            width: 65%;
             height: 100%;
             background-color: #BED7DC ;
             display: flex;
@@ -43,6 +43,7 @@
         #button-container {
             text-align: right;   /* 讓按鈕靠右對齊 */
             margin-bottom: 10px; /* 按鈕容器與地圖之間增加一點距離 */
+            z-index: 9999;
         }
 
         .toggle-btn {
@@ -105,7 +106,7 @@
     <div id="chart">
         <div>
             <div style="text-align: center;">
-                <h1>2023年 7月 路線交易量(單邊)</h1>
+                <h1 style = "margin-top: 80px;">2023年 7月 路線交易量(單邊)</h1>
             </div>
             
             <div id="line_chart"></div>

@@ -8,7 +8,13 @@ from shapely.geometry import LineString
 import random
 import geopandas as gpd
 from bike_data import get_weather as bike_weather
+from constant_plot import generate_distribution_plot,generate_exist_rate,generate_fee_plot
 import json
+import os
+import sys
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(os.path.dirname(os.path.dirname(abspath)))
+sys.path.append(dname)
 
 app = FastAPI()
 
@@ -148,7 +154,7 @@ def return_week_route():
 @app.get("/mapbox/refresh_weekend_route_sample/{frac}")
 def refresh_weekend_route_sample(frac: float = 0.3):
     """
-    將間起訖站點統計進行隨機抽樣並將 GeoJSON 存成新檔案
+    將週間、週末起訖站點統計進行隨機抽樣並將 GeoJSON 存成新檔案
     """
     try:
         # 周末
@@ -178,40 +184,74 @@ def refresh_weekend_route_sample(frac: float = 0.3):
     except Exception as e:
         return str(e)
 
+@app.get("/refresh/constant_html/{token}")
+def refresh_html(token: str):
+    if token == "admin":
+        try:
+            # generate_distribution_plot()
+            # generate_exist_rate()
+            generate_fee_plot()
+            return f"html has been refreshed. status: 200 ok"
+        except Exception as e:
+            return str(e)
+    else:
+        pass
+
 # 路由設定
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def read_index():
+async def read_html():
     with open("static/home.html", "r", encoding="utf-8") as file:
         return file.read()
 
+@app.get("/fullpage", response_class=HTMLResponse)
+async def read_html():
+    with open("static/fullpage.html", "r", encoding="utf-8") as file:
+        return file.read()
+
 @app.get("/index", response_class=HTMLResponse)
-async def read_index():
+async def read_html():
     with open("static/index.html", "r", encoding="utf-8") as file:
         return file.read()
     
 @app.get("/mapbox", response_class=HTMLResponse)
-async def read_mapbox():
+async def read_html():
     with open("static/mapbox.html", "r", encoding="utf-8") as file:
         return file.read()
     
 @app.get("/leaflet", response_class=HTMLResponse)
-async def read_mapbox():
+async def read_html():
     with open("static/leaflet.html", "r", encoding="utf-8") as file:
         return file.read()
     
 @app.get("/mapbox_3d", response_class=HTMLResponse)
-async def read_mapbox():
+async def read_html():
     with open("static/mapbox_3d.html", "r", encoding="utf-8") as file:
         return file.read()
     
 @app.get("/d3", response_class=HTMLResponse)
-async def read_mapbox():
+async def read_html():
     with open("static/d3_.html", "r", encoding="utf-8") as file:
         return file.read()
     
-@app.get("/poi", response_class=HTMLResponse)
-async def read_mapbox():
-    with open("static/POI.html", "r", encoding="utf-8") as file:
+@app.get("/bike_routes_map", response_class=HTMLResponse)
+async def read_html():
+    with open("static/bike_routes_map.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/見車率", response_class=HTMLResponse)
+async def read_html():
+    with open("static/見車率.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+    
+@app.get("/見車率_0930", response_class=HTMLResponse)
+async def read_html():
+    with open("static/見車率_0930.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/distribute", response_class=HTMLResponse)
+async def read_html():
+    with open("static/distribute.html", "r", encoding="utf-8") as file:
         return file.read()

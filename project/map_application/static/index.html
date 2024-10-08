@@ -113,6 +113,13 @@
         
             <!-- 這裡是 .demographics 和搜尋框同時在 content-wrapper 裡面 -->
             <div class="demographics-search-container">
+
+                 <!-- 搜尋框放置在 .demographics 正下方 -->
+                 <div class="search-container">
+                    <input type="text" id="station-search" placeholder="輸入站名(僅顯示有選取到的ubike站)🐾" />
+                    <ul id="search-results" class="autocomplete-list"></ul> <!-- 顯示匹配結果 -->
+                </div>
+                
                 <div class="demographics">
                     <h4>Bike Station Availability Ranking🏝️</h4>
                     <ul>
@@ -120,11 +127,7 @@
                     </ul>
                 </div>
         
-                <!-- 搜尋框放置在 .demographics 正下方 -->
-                <div class="search-container">
-                    <input type="text" id="station-search" placeholder="輸入站名(僅顯示有選取到的ubike站)🐾" />
-                    <ul id="search-results" class="autocomplete-list"></ul> <!-- 顯示匹配結果 -->
-                </div>
+               
             </div>
         </div>
         

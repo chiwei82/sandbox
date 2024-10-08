@@ -185,7 +185,7 @@ var stationData = [];
 fetch("/bike-stations")
     .then(response => response.json())
     .then(data => {
-        stationData = data; // 儲存站點數據
+        stationData = data;
     });
 
 

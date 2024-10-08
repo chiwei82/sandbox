@@ -98,7 +98,7 @@ Promise.all([
 
     const margin = { top: 60, right: 100, bottom: 30, left:100 };
     const width = 1000 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const height = 350 - margin.top - margin.bottom;
 
     // Create the SVG element within the #line_chart div
     const svg = d3.select("#line_chart")
@@ -293,7 +293,7 @@ Promise.all([
     
     const margin_bar = { top: 20, right: 100, bottom: 60, left: 300 };
     const width_bar = 1000 - margin_bar.left - margin_bar.right;
-    const height_bar = 500 - margin_bar.top - margin_bar.bottom;
+    const height_bar = 450 - margin_bar.top - margin_bar.bottom;
 
     // 創建 SVG 容器並附加到 <div id="bar_chart">
     const svg_bar = d3.select("#bar_chart").append("svg")
