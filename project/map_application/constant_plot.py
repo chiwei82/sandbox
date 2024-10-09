@@ -225,8 +225,8 @@ def generate_fee_plot():
         filtered = pd.concat([filtered,station])
 
     mymap = folium.Map(location=[25.065,121.56], zoom_start=12,
-                tiles='https://api.mapbox.com/styles/v1/mapbox/navigation-night-v1/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic2hpYm55IiwiYSI6ImNrcWtjMDg0NjA0anQyb3RnZnl0cDJkYmYifQ.hqyJUg0ZRzAZbcJwkfs0bQ',
-                    attr='Mapbox')
+                tiles='https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic2hpYm55IiwiYSI6ImNrcWtjMDg0NjA0anQyb3RnZnl0cDJkYmYifQ.hqyJUg0ZRzAZbcJwkfs0bQ',
+                attr='Mapbox')
 
     def get_color_from_ratio(ratio):
 
@@ -251,7 +251,7 @@ def generate_fee_plot():
         folium.PolyLine(
             locations=[(row['lat_start'], row['lng_start']), (row['lat_end'], row['lng_end'])],
             color=get_color_from_ratio(row["付費比率"]),  
-            weight=2*(row["路線次數"]/filtered.query("付費比率 ==0")["路線次數"].max()),
+            weight = min(2 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2),
             opacity = get_op(row["路線次數"])       
         ).add_to(mymap)
 
@@ -264,7 +264,7 @@ def generate_fee_plot():
         folium.PolyLine(
             locations=[(row['lat_start'], row['lng_start']), (row['lat_end'], row['lng_end'])],
             color=get_color_from_ratio(row["付費比率"]),  
-            weight= min(2 * (row["路線次數"] / filtered.query("付費比率 != 0")["路線次數"].mean()), 3),
+            weight = min(2 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2) ,
             opacity = get_op(row["路線次數"])
         ).add_to(mymap)
 
@@ -315,7 +315,7 @@ def generate_fee_plot():
                 </div>
                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                     <i style="background:orange; width: 20px; height: 20px; display:inline-block; border-radius: 50%;"></i>
-                    <span style="font-size: 14px; margin-left: 10px;"> "付費" 路線: 顏色越深、越粗代表越多人騎乘 </span>
+                    <span style="font-size: 14px; margin-left: 10px;"> "付費" 路線: 顏色越深、越粗代表越這條路線有較高的比率會產生收入 </span>
                 </div>
                 
             </div>

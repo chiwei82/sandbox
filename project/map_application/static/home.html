@@ -33,12 +33,46 @@
             border: none;
         }
 
+        .custom-table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .custom-table th {
+            background-color: #f2f2f2;
+        }
+
+        .custom-table td {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* .fade-in {
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        .fade-in.show {
+            opacity: 1;
+        } */
+
         /* Ensures iframe height expands if the viewport is taller */
         @media (min-height: 911px) {
             iframe {
                 height: 100vh; /* Fill the entire viewport height if taller */
             }
         }
+
+
     </style>
 </head>
 <body>
@@ -60,7 +94,18 @@
 
     <div class="section">
         <h1>How is the station distribution?</h1>
-        <iframe src="/distribute"></iframe>
+        <div style="display: flex; width: 100%;background-color: #E5DDC5 ;">
+            <div style="width: 25%">
+                <h1 style="text-align: center;margin-top: 50%;">截止至2024年</h1>
+                <h4 style="text-align: center;margin-top: 10%;">全台北共有 <strong>1400+</strong> 的Youbike站點</h4>
+                <h4 style="text-align: center;margin-top: 10%;"><strong>3萬7+ </strong>個可還車位</h4>
+                <h4 style="text-align: center;margin-top: 10%;">其中超過80個車位的大站點共有10個</h4>
+                <h4 style="text-align: center;margin-top: 10%;">分別為西門町區域、台大校區、信義區、市府捷運站等</h4>
+            </div>
+            <div style="width: 75%">
+                <iframe src="/distribute"></iframe>
+            </div>
+        </div>
     </div>
 
     <div class="section">
@@ -75,7 +120,16 @@
 
     <div class="section">
         <h1>The riden fee generated?</h1>
-        <iframe src="/bike_routes_map"></iframe>
+        <div style="display: flex; width: 100%;background-color: #E5DDC5 ;">
+            <iframe src="/bike_routes_map" style="width: 75%;"></iframe>
+            <div style="width: 35%;">        
+                <p style = "text-align: center;">產生付費次數的比率 = 該站點產生費用的「借出或還入次數」÷ 該站點的「總借出或還入次數」</p>
+                <div id="table1-container">
+                </div>
+                <div id="table2-container">
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="section">
@@ -101,6 +155,7 @@
 
 <!-- fullPage.js JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.1.2/fullpage.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     new fullpage('#fullpage', {
         autoScrolling: true,
@@ -110,6 +165,47 @@
         showActiveTooltip: true,
         scrollingSpeed: 700
     });
+    
+    fetch("/h10_還")
+        .then(respnse => respnse.json())
+        .then(data => renderTable("#table1-container","還車站(In)", data))
+
+    fetch("/h10_租")
+        .then(respnse => respnse.json())
+        .then(data => renderTable("#table2-container","租車站(Out)",data))
+
+    // 渲染表格函數
+    function renderTable(containerId, st_type,data) {
+        // 建立表格元素
+        const table = d3.select(containerId)
+            .append("table")
+            .attr("class", "custom-table");
+
+        // 新增表格標頭
+        const thead = table.append("thead");
+        thead.append("tr")
+            .selectAll("th")
+            .data([st_type, "產生付費的次數", "產生付費次數的比率"])
+            .enter()
+            .append("th")
+            .text(d => d);
+
+        // 新增表格內容
+        const tbody = table.append("tbody");
+
+        // 綁定資料到行
+        const rows = tbody.selectAll("tr")
+            .data(data)
+            .enter()
+            .append("tr");
+
+        // 綁定資料到每個單元格
+        rows.selectAll("td")
+            .data(d => [d.station, d.rev, d.rate+" %"])
+            .enter()
+            .append("td")
+            .text(d => d);
+    }
 </script>
 
 </body>

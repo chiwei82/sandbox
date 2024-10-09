@@ -197,6 +197,20 @@ def refresh_html(token: str):
     else:
         pass
 
+@app.get("/h10_租")
+def get_top10():
+    with open(r"static\data\h10付費_租出.json", "r", encoding="utf-8") as json_file:
+        to_return = json.load(json_file)
+
+    return to_return
+
+@app.get("/h10_還")
+def get_top10():
+    with open(r"static\data\h10付費_還入.json", "r", encoding="utf-8") as json_file:
+        to_return = json.load(json_file)
+
+    return to_return
+
 # 路由設定
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -254,4 +268,9 @@ async def read_html():
 @app.get("/distribute", response_class=HTMLResponse)
 async def read_html():
     with open("static/distribute.html", "r", encoding="utf-8") as file:
+        return file.read()
+    
+@app.get("/test", response_class=HTMLResponse)
+async def read_html():
+    with open("static/test.html", "r", encoding="utf-8") as file:
         return file.read()
