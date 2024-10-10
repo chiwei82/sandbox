@@ -240,7 +240,7 @@ def generate_fee_plot():
         folium.PolyLine(
             locations=[(row['lat_start'], row['lng_start']), (row['lat_end'], row['lng_end'])],
             color=get_color_from_ratio(row["付費比率"]),  
-            weight = min(2 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2),
+            weight = min(0.8 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2),
             opacity = get_op(row["路線次數"])       
         ).add_to(mymap)
 
@@ -253,7 +253,7 @@ def generate_fee_plot():
         folium.PolyLine(
             locations=[(row['lat_start'], row['lng_start']), (row['lat_end'], row['lng_end'])],
             color=get_color_from_ratio(row["付費比率"]),  
-            weight = min(2 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2) ,
+            weight = min(0.8 * (row["路線次數"] ** 0.5 / filtered["路線次數"].mean() ** 0.5), 2) ,
             opacity = get_op(row["路線次數"])
         ).add_to(mymap)
 
