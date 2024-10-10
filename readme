@@ -17,11 +17,6 @@ API 種類
  • 靜態文件服務：提供前端視覺化 HTML 文件，用於渲染地圖（Mapbox, Leaflet, D3.js 等）
 
 網頁
-POI.html
-• 從互補站點擷取前 500 互補人數排名的站點
-• 定義互補人數高達 500人的為高通勤(平均站點數量 25 個車位 * 平均通勤日 20 天)
-• 搜尋各站點 1 km 以內的 POI 前五名(1公里為平均使用距離)
-• 以 2 KM 為 分組距離在地圖上繪製多邊形(2公里較能夠歸類站點間的共同成分)
 
 mapbox.html
 • 呈現週間、週末的熱力圖: 考慮到載入速度，對原始資料進行 30%抽樣。
@@ -35,29 +30,6 @@ Leaflet.html
 index.html
 • 呈現實時站點資訊
 • mapbox_3d 是相同的，只是以3D地圖呈現
-
-
-在docker 執行步驟
-# Step 1 : 確認目前電腦 docker 正在運行
-docker info
-
-# Step 2 : 構建 Docker 映像
-docker build -t my-fastapi-app .
-
-# Step 3 : 執行映像
-docker run -d -p 8080:8080 --name fastapi-container my-fastapi-app
-
-# 啟動建立好的映像
-docker start fastapi-container
-
-# 檢查當前運行的容器
-docker ps -a
-
-# 停止容器
-docker stop fastapi-container
-
-# 刪除容器(需先停止容器)
-docker rm -f fastapi-container
 
 API 端點
 1. GET /bike-stations

@@ -110,8 +110,7 @@ def generate_distribution_plot():
             </div>
         </div>
     </div>
-
-        """
+    """
 
     m.get_root().html.add_child(folium.Element(legend_html))
 
@@ -199,7 +198,7 @@ def generate_exist_rate():
                 </div>
             </div>
             </div>
-            """
+        """
 
         m.get_root().html.add_child(folium.Element(legend_html))
         m.save(dname +f"\project\map_application\static\{save_name}.html")

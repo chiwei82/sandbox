@@ -16,15 +16,11 @@ function createMap(containerId, style, fetchPath) {
         fetch(fetchPath)
           .then(response => response.json())
           .then(data => {
-            // 從 GeoJSON 中提取所有的 sum_of_txn_times
             const sumOfTxnTimesArray = data.features.map(feature => feature.properties.sum_of_txn_times);
-
-            // 獲取最大值
             const maxSumOfTxnTimes = Math.max(...sumOfTxnTimesArray);
 
             console.log(containerId + " -> maxSumOfTxnTimes = " + maxSumOfTxnTimes);
 
-            // 加載 GeoJSON 資料
             map.addSource('route_data', {
               'type': 'geojson',
               'data': data
