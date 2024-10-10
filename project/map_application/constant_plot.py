@@ -1,26 +1,16 @@
+import os
+import sys
 import folium
 import duckdb
 import pandas as pd
-import sys
-import os
-import dask
-import requests
-import json
+import geopandas as gpd
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.colors as mcolors
+
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(os.path.dirname(os.path.dirname(abspath)))
 sys.path.append(dname)
-
-import matplotlib.pyplot as plt
-import pandas as pd
-import duckdb
-import folium
-import os
-import random
-import geopandas as gpd
-from geopy.distance import geodesic
-from shapely.geometry import MultiPoint, Polygon
-from matplotlib.colors import LinearSegmentedColormap
-import matplotlib.colors as mcolors
 
 plt.rcParams['font.sans-serif'] = ['Taipei Sans TC Beta'] 
 plt.rcParams['axes.unicode_minus'] = False 

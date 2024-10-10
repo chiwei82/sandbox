@@ -5,7 +5,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from datetime import datetime, timedelta
 from shapely.geometry import LineString
-import random
 import geopandas as gpd
 from bike_data import get_weather as bike_weather
 from constant_plot import generate_distribution_plot,generate_exist_rate,generate_fee_plot

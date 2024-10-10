@@ -195,6 +195,7 @@ Promise.all([
 
     //// mouseover event 連動 leaflet與 d3 js
     function highlightFeature(e) {
+        // map highlight
         var layer = e.target;
     
         layer.setStyle({
@@ -209,6 +210,7 @@ Promise.all([
 
         var featureName = layer.feature.properties.name;
         
+        // d3 hight light
         function highlightD3Feature(name) {
             const index = names.indexOf(name);
             if (index !== -1) {
