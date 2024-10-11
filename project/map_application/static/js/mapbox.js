@@ -87,8 +87,8 @@ function createMap(containerId, style, fetchPath) {
 }
 
 // 創建兩個不同的地圖實例，並分別加載不同的 GeoJSON 數據
-var beforeMap = createMap('before', 'mapbox://styles/mapbox/streets-v11', '/mapbox/week_route');
-var afterMap = createMap('after', 'mapbox://styles/mapbox/outdoors-v12', '/mapbox/weekend_route');
+var beforeMap = createMap('before', 'mapbox://styles/mapbox/streets-v11', '/mapbox/routes/week');
+var afterMap = createMap('after', 'mapbox://styles/mapbox/outdoors-v12', '/mapbox/routes/weekend');
 
 // A selector or reference to HTML element
 const container = '#comparison-container';

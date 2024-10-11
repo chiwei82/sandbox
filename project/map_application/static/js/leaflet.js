@@ -23,15 +23,15 @@ info.addTo(map);
 
 // 綁定按鈕點擊事件
 document.getElementById("weekdayBtn").addEventListener("click", function() {
-    renderMapAndBarChart("/geojson", "/top_ten_routes");
+    renderMapAndBarChart("/geojson/week", "/top_ten_routes/week");
 });
 
 document.getElementById("weekendBtn").addEventListener("click", function() {
-    renderMapAndBarChart("/geojson_weekend", "/top_ten_routes_weekend");
+    renderMapAndBarChart("/geojson/weekend", "/top_ten_routes/weekend");
 });
 
 // 預設顯示週間資料
-renderMapAndBarChart("/geojson", "/top_ten_routes");
+renderMapAndBarChart("/geojson/week", "/top_ten_routes/week");
 
 function renderMapAndBarChart(geojsonUrl, routesUrl){
     

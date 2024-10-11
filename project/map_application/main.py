@@ -59,94 +59,71 @@ def get_country_moi():
 
     return geojson_data
 
-@app.get("/geojson")
-def load_geojson():
+@app.get("/geojson/{weekend_status}")
+def load_geojson(weekend_status: str):
     """
     回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間) 以便繪圖使用
     """
-    with open("static\geojson\OSM_DATA.geojson", "r", encoding="utf-8") as geojson_file:
-        geojson_data = json.load(geojson_file)
+    def load_json(file_path):
+        with open(f"{file_path}", "r", encoding="utf-8") as geojson_file:
+            geojson_data = json.load(geojson_file)
+        return geojson_data
 
-    return geojson_data
-
-@app.get("/geojson_weekend")
-def load_geojson_weekend():
-    """
-    回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間) 以便繪圖使用
-    """
+    if weekend_status == "week":
+        geojson_data = load_json("static\geojson\OSM_DATA.geojson")    
     
-    with open("static\geojson\OSM_DATA_weekend.geojson", "r", encoding="utf-8") as geojson_file:
-        geojson_data = json.load(geojson_file)
+    elif weekend_status == "weekend":
+        geojson_data = load_json("static\geojson\OSM_DATA_weekend.geojson")    
 
     return geojson_data
 
-@app.get("/top_ten_routes")
-def return_top_tY():
+@app.get("/top_ten_routes/{weekend_status}") 
+def return_top_tY(weekend_status: str):
     """
     回傳 站點使用量 (週間) 前 20 站點
     """
-    top = pd.read_csv(r"static\data\週間起訖站點統計_cleaned.csv")\
-        .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
-        .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
-                   'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
-    
-    def create_linestring(row):
-        return LineString([(row['lng_start'], row['lat_start']), (row['lng_end'], row['lat_end'])])
+    if weekend_status == "week":
+        file_path = r"static\data\週間起訖站點統計_cleaned.csv"
+    elif weekend_status == "weekend":
+        file_path = r"static\data\週末起訖站點統計_cleaned.csv"
 
-    top['geometry'] = top.apply(create_linestring, axis=1)
-    top['mean_of_txn_times_byRoutes'] = top['mean_of_txn_times_byRoutes'].round(0)
-    gdf = gpd.GeoDataFrame(top, geometry='geometry')
-    
-    gpd.GeoDataFrame(gdf, geometry='geometry')\
-        .to_file(r"static\geojson\top_ten.geojson", driver="GeoJSON")
-    
-    with open(r"static\geojson\top_ten.geojson", "r", encoding="utf-8") as geojson_file:
-        to_return = json.load(geojson_file)
+    def json_etl(file_path):
+        top = pd.read_csv(file_path)\
+            .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
+            .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
+                    'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
+        
+        def create_linestring(row):
+            return LineString([(row['lng_start'], row['lat_start']), (row['lng_end'], row['lat_end'])])
 
-    return to_return
-
-@app.get("/top_ten_routes_weekend")
-def return_top_tY():
-    """
-    回傳 站點使用量 (週末) 前 20 站點
-    """
-    top = pd.read_csv(r"static\data\週末起訖站點統計_cleaned.csv")\
-        .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
-        .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
-                   'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
+        top['geometry'] = top.apply(create_linestring, axis=1)
+        top['mean_of_txn_times_byRoutes'] = top['mean_of_txn_times_byRoutes'].round(0)
+        gdf = gpd.GeoDataFrame(top, geometry='geometry')
+        
+        gpd.GeoDataFrame(gdf, geometry='geometry')\
+            .to_file(fr"static\geojson\top_ten_{weekend_status}.geojson", driver="GeoJSON")
+        
+        with open(fr"static\geojson\top_ten_{weekend_status}.geojson", "r", encoding="utf-8") as geojson_file:
+            to_return = json.load(geojson_file)
+        
+        return to_return
     
-    def create_linestring(row):
-        return LineString([(row['lng_start'], row['lat_start']), (row['lng_end'], row['lat_end'])])
-
-    top['geometry'] = top.apply(create_linestring, axis=1)
-    top['mean_of_txn_times_byRoutes'] = top['mean_of_txn_times_byRoutes'].round(0)
-    gdf = gpd.GeoDataFrame(top, geometry='geometry')
-    
-    gpd.GeoDataFrame(gdf, geometry='geometry')\
-        .to_file(r"static\geojson\top_ten_weekend.geojson", driver="GeoJSON")
-    
-    with open(r"static\geojson\top_ten_weekend.geojson", "r", encoding="utf-8") as geojson_file:
-        to_return = json.load(geojson_file)
+    to_return = json_etl(file_path)
 
     return to_return
 
-@app.get("/mapbox/week_route")
-def return_week_route():
+@app.get("/mapbox/routes/{weekend_status}")
+def return_week_route(weekend_status):
     """
     讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
     """ 
-    with open(r"static\geojson\week_route.geojson", "r", encoding="utf-8") as geojson_file:
-        to_return = json.load(geojson_file)
+    if weekend_status == "week":
+        with open(r"static\geojson\week_route.geojson", "r", encoding="utf-8") as geojson_file:
+            to_return = json.load(geojson_file)
 
-    return to_return
-
-@app.get("/mapbox/weekend_route")
-def return_week_route():
-    """
-    讀取 SAMPLED WEEKend ROUTE 並回傳 GeoJSON
-    """ 
-    with open(r"static\geojson\weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
-        to_return = json.load(geojson_file)
+    elif weekend_status == "weekend":
+        with open(r"static\geojson\weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
+            to_return = json.load(geojson_file)
 
     return to_return
 

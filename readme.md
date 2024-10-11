@@ -1,12 +1,13 @@
 # YouBike 資料視覺化專案
 
-此專案使用 FastAPI 構建，提供多個 API 端點來進行台北市 YouBike 自行車站點的即時數據視覺化和路徑分析。整合了自行車站點數據、地理數據，使用於 Mapbox 或 Leaflet 等地圖視覺化套件中。
+此專案使用 FastAPI 構建，提供多個 API 端點來進行台北市 YouBike 自行車站點的即時數據視覺化和路徑分析。
+整合了自行車站點數據、地理數據，使用於 Mapbox 或 Leaflet 等地圖視覺化套件中，並使用 d3.js 呈現圖表。
 
 ## 專案目的
 
-- 找出使用者的使用習慣、站點的潛在分群、實時站點數據等資訊
-- 透過週間、週末的熱力圖、前 20 大站點路徑分析、實時站點資訊、3D 地圖，勾勒出使用者習慣
-- 幫助潛在 TA 了解台北市市民使用 YouBike 的狀況，並基於此提出建議
+- 找出使用者的使用習慣、站點的潛在分群、提供實時站點數據查詢
+- 透過週間、週末的熱力圖、前 20 大站點路徑分析、付費路線分析，勾勒出使用者習慣
+- 幫助潛在 TA 了解台北市市民使用 YouBike 的狀況
 
 ## 如何運行
 #### 使用 Docker
@@ -23,12 +24,11 @@
 
 ## API 種類
 
-- **即時站點數據**：提供台北市 YouBike 站點的即時自行車數據，包括可用車輛數量、站點座標等。
+- **即時站點數據**：提供台北市 YouBike 站點的即時自行車數據，包括可用車輛數量、目前是否有充足的腳踏車。
 - **天氣資訊查詢**：根據指定城市名稱獲取當前天氣資訊。
-- **GeoJSON 數據**：提供台北市各區域站點的使用數據（週間和週末），並生成 GeoJSON 格式供地圖使用。
-- **前 20 大站點路徑分析**：回傳週間和週末使用量最大的前 20 條站點路徑。
-- **路徑數據隨機抽樣**：針對站點使用量數據進行隨機抽樣，供樣本分析與可視化，以提升繪圖速度。
-- **靜態文件服務**：提供前端視覺化 HTML 文件，用於渲染地圖（Mapbox, Leaflet, D3.js 等）。
+- **讀取GeoJSON 數據**：回傳具有商業資訊的 GeoJson data
+- **Data IO**：使用 API 進行ETL (e.g. 隨機抽樣、讀取duckdb 後將資料提供js繪製) 
+- **靜態文件服務**：掛載前端視覺化 HTML 文件，用於渲染地圖（Mapbox, Leaflet, D3.js 等）。
 
 ## 前端網頁
 
@@ -46,12 +46,12 @@
 
 ### index.html
 - 呈現實時站點資訊。
-- mapbox_3d 是相同的，只是以 3D 地圖呈現。
+- mapbox_3d 是相同的，以 3D 地圖呈現。
 
 ## API 端點
 
 ### 1. GET /bike-stations
-- 抓取台北市即時的 YouBike 站點資料。
+- 抓取台北市政府公開資訊即時 YouBike 站點資料。
 - **回應格式**：JSON，包含站點名稱、座標、可租借自行車數量、抓取時間等資訊。
 - **範例請求**：`/bike-stations`
 
@@ -66,42 +66,32 @@
 - **回應格式**：GeoJSON，用於地理資訊可視化。
 - **範例請求**：`/country_moi`
 
-### 4. GET /geojson
-- 回傳台北市的 GeoJSON 資料，包含週間站點使用量數據。
-- **回應格式**：GeoJSON，包含各行政區的站點使用數據。
-- **範例請求**：`/geojson`
+### 4. GET /geojson/{weekend_status}
+- 根據 weekend_status 回傳 台北市的 GeoJSON 資料，
+- **回應格式**：GeoJSON，包含各行政區的站點使用數據
+- **參數**：`weekend_status` (str) - "week"、"weekend"
+- **範例請求**：`/geojson/week`
 
-### 5. GET /geojson_weekend
-- 回傳台北市的 GeoJSON 資料，包含週末站點使用量數據。
-- **回應格式**：GeoJSON，包含各行政區的站點使用數據。
-- **範例請求**：`/geojson_weekend`
-
-### 6. GET /top_ten_routes
+### 5. GET /top_ten_routes/{weekend_status}
 - 回傳站點使用量前 20 的路徑數據（週間）。
 - **回應格式**：GeoJSON，包含前 20 名站點路徑及其相關資訊。
-- **範例請求**：`/top_ten_routes`
+- **參數**：`weekend_status` (str) - "week"、"weekend"
+- **範例請求**：`/top_ten_routes/week`
 
-### 7. GET /top_ten_routes_weekend
-- 回傳站點使用量前 20 的路徑數據（週末）。
-- **回應格式**：GeoJSON，包含前 20 名站點路徑及其相關資訊。
-- **範例請求**：`/top_ten_routes_weekend`
-
-### 8. GET /mapbox/week_route
+### 6. GET /mapbox/routes/{weekend_status}
 - 回傳台北市週間路徑資料的 GeoJSON，用於可視化。
 - **回應格式**：GeoJSON。
-- **範例請求**：`/mapbox/week_route`
+- **參數**：`weekend_status` (str) - "week"、"weekend"
+- **範例請求**：`/mapbox/routes/week`
 
-### 9. GET /mapbox/weekend_route
-- 回傳台北市週末路徑資料的 GeoJSON，用於可視化。
-- **回應格式**：GeoJSON。
-- **範例請求**：`/mapbox/weekend_route`
-
-### 10. GET /mapbox/refresh_weekend_route_sample/{frac}
+### 7. GET /mapbox/refresh_route_sample/{frac}
 - 根據指定比例隨機抽樣站點路徑數據，並生成新的 GeoJSON 檔案。
 - **參數**：`frac` (float) - 抽樣比例（預設為 0.3）。
-- **回應格式**：文字訊息，表示抽樣狀態。
-- **範例請求**：`/mapbox/refresh_weekend_route_sample/0.5`
+- **回應格式**：文字訊息，表示抽樣狀態是否成功。
+- **範例請求**：`/mapbox/refresh_route_sample/0.5`
 
-### 11. GET /refresh/constant_html/{token}
+### 8. GET /refresh/constant_html/{token}
 - 刷新以 Python 撰寫的 ETL 形式產生的 HTML 檔案。
+- **回應格式**：文字訊息，表示 ETL 是否成功。
 - **參數**：`token` (字串) - 管理員密碼。只有當 token === 'admin' 時才進行刷新。
+- **範例請求**：`/refresh/constant_html/admin`
