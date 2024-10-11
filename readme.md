@@ -18,7 +18,7 @@
 2. `啟動虛擬環境` env\Scripts\activate
 3. `安裝套件` pip install -r requirements.txt
 4. `移至目錄` cd project/map_application
-5  `啟動` uvicorn main:app --reload
+5.  `啟動` uvicorn main:app --reload
 6. `測試 & debug` 此專案預設執行路徑在 ${workspaceFolder}
 
 ## API 種類
