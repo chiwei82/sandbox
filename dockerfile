@@ -7,6 +7,7 @@ WORKDIR /workspace/project/fastapi
 # 複製項目相關文件夾到容器中
 COPY ./project/map_application /workspace/project/map_application
 COPY ./requirements.txt /workspace/
+COPY ./function /workspace/function
 
 # 安裝依賴，確保在正確目錄下
 RUN pip install --no-cache-dir -r /workspace/requirements.txt
@@ -15,4 +16,4 @@ RUN pip install --no-cache-dir -r /workspace/requirements.txt
 EXPOSE 8080
 
 # 設置啟動命令，確保 FastAPI 應用路徑正確
-CMD ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "map_application.main:app", "--reload", "--host", "0.0.0.0", "--port", "8080"]
