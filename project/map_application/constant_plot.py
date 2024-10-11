@@ -261,7 +261,8 @@ def generate_fee_plot():
         folium.CircleMarker(
             location=[row['lat_start'], row['lng_start']],
             radius=1,  
-            tooltip=folium.Tooltip(f"<div style='font-size: 18px;'>站點: {row['借車站']}</div>"),  
+            tooltip=folium.Tooltip(f"<div style='font-size: 18px;'>站點: {row['借車站']}</div>"),
+            popup=folium.Popup(f"<div style='font-size: 18px;'>站點: {row['借車站']}</div>", max_width=300),  
             color="red",  
             fill=True,
             fill_color="red", 
@@ -272,7 +273,8 @@ def generate_fee_plot():
         folium.CircleMarker(
             location=[row['lat_end'], row['lng_end']],
             radius=1,  
-            tooltip=folium.Tooltip(f"<div style='font-size: 18px;'>站點: {row['還車站']}</div>"),  
+            tooltip=folium.Tooltip(f"<div style='font-size: 18px;'>站點: {row['還車站']}</div>"),
+            popup=folium.Popup(f"<div style='font-size: 18px;'>站點: {row['還車站']}</div>", max_width=300),
             color="red",  
             fill=True,
             fill_color="red", 
@@ -280,35 +282,34 @@ def generate_fee_plot():
         ).add_to(mymap)
 
     legend_html = """
-            <div style="
-            position: fixed;
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            width: auto; 
-            height: auto;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: 2px solid grey; 
-            z-index: 9999; 
-            font-size: 16px; 
-            line-height: 1.6;
-            border-radius: 15px; 
-            padding: 10px;
-            text-align: center;
-            ">
-            <strong style="font-size: 18px;">Legend</strong> <br>
-            <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; margin-top: 10px;">
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <i style="background:gray; width: 20px; height: 20px; display:inline-block; border-radius: 50%;"></i>
-                    <span style="font-size: 14px; margin-left: 10px;"> "免費" 路線: 顏色越深、越粗代表越多人騎乘 </span>
-                </div>
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <i style="background:orange; width: 20px; height: 20px; display:inline-block; border-radius: 50%;"></i>
-                    <span style="font-size: 14px; margin-left: 10px;"> "付費" 路線: 顏色越深、越粗代表越這條路線有較高的比率會產生收入 </span>
-                </div>
-                
+        <div style="
+        position: fixed;
+        top: 20px; 
+        left: 50%; 
+        transform: translateX(-50%);
+        width: auto; 
+        height: auto;
+        background-color: rgba(255, 255, 255, 0.8);
+        border: 2px solid grey; 
+        z-index: 9999; 
+        font-size: 16px; 
+        line-height: 1.6;
+        border-radius: 15px; 
+        padding: 10px;
+        text-align: center;
+        ">
+        <strong style="font-size: 18px;">Legend</strong> <br>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; margin-top: 10px;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <i style="background:gray; width: 20px; height: 20px; display:inline-block; border-radius: 50%;"></i>
+                <span style="font-size: 14px; margin-left: 10px;"> "免費" 路線: 顏色越深、越粗代表越多人騎乘 </span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <i style="background:orange; width: 20px; height: 20px; display:inline-block; border-radius: 50%;"></i>
+                <span style="font-size: 14px; margin-left: 10px;"> "付費" 路線: 顏色越深、越粗代表此路線付費比率越高 </span>
             </div>
         </div>
+    </div>
     """
     
     mymap.get_root().html.add_child(folium.Element(legend_html))
