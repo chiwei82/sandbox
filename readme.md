@@ -16,9 +16,10 @@
 #### 使用 local host
 1. `創立虛擬環境` python -m venv env 
 2. `啟動虛擬環境` env\Scripts\activate
-3. `移至目錄` cd project/map_application
-4 `啟動` uvicorn main:app --reload
-5. `測試`: 專案預設執行在 ${workspaceFolder}
+3. `安裝套件` pip install -r requirements.txt
+4. `移至目錄` cd project/map_application
+5  `啟動` uvicorn main:app --reload
+6. `測試 & debug` 此專案預設執行路徑在 ${workspaceFolder}
 
 ## API 種類
 
