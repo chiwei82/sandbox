@@ -6,14 +6,16 @@ from fastapi.responses import HTMLResponse
 from datetime import datetime, timedelta
 from shapely.geometry import LineString
 import geopandas as gpd
-from bike_data import get_weather as bike_weather
-from constant_plot import generate_distribution_plot,generate_exist_rate,generate_fee_plot
 import json
+
 import os
 import sys
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(os.path.dirname(os.path.dirname(abspath)))
+sys.path.append(os.path.dirname(abspath))
 sys.path.append(dname)
+from bike_data import get_weather as bike_weather
+from constant_plot import generate_distribution_plot,generate_exist_rate,generate_fee_plot
 
 app = FastAPI()
 
@@ -54,7 +56,7 @@ def get_country_moi():
     """
     回傳 "台灣" 的 GeoJSON
     """
-    with open(r"static\geojson\COUNTY_MOI_1130718.json", "r", encoding="utf-8") as geojson_file:
+    with open(r"static/geojson/COUNTY_MOI_1130718.json", "r", encoding="utf-8") as geojson_file:
         geojson_data = json.load(geojson_file)
 
     return geojson_data
@@ -70,10 +72,10 @@ def load_geojson(weekend_status: str):
         return geojson_data
 
     if weekend_status == "week":
-        geojson_data = load_json("static\geojson\OSM_DATA.geojson")    
+        geojson_data = load_json("static/geojson/OSM_DATA.geojson")    
     
     elif weekend_status == "weekend":
-        geojson_data = load_json("static\geojson\OSM_DATA_weekend.geojson")    
+        geojson_data = load_json("static/geojson/OSM_DATA_weekend.geojson")    
 
     return geojson_data
 
@@ -83,9 +85,9 @@ def return_top_tY(weekend_status: str):
     回傳 站點使用量 (週間) 前 20 站點
     """
     if weekend_status == "week":
-        file_path = r"static\data\週間起訖站點統計_cleaned.csv"
+        file_path = r"static/data/週間起訖站點統計_cleaned.csv"
     elif weekend_status == "weekend":
-        file_path = r"static\data\週末起訖站點統計_cleaned.csv"
+        file_path = r"static/data/週末起訖站點統計_cleaned.csv"
 
     def json_etl(file_path):
         top = pd.read_csv(file_path)\
@@ -101,9 +103,9 @@ def return_top_tY(weekend_status: str):
         gdf = gpd.GeoDataFrame(top, geometry='geometry')
         
         gpd.GeoDataFrame(gdf, geometry='geometry')\
-            .to_file(fr"static\geojson\top_ten_{weekend_status}.geojson", driver="GeoJSON")
+            .to_file(fr"static/geojson/top_ten_{weekend_status}.geojson", driver="GeoJSON")
         
-        with open(fr"static\geojson\top_ten_{weekend_status}.geojson", "r", encoding="utf-8") as geojson_file:
+        with open(fr"static/geojson/top_ten_{weekend_status}.geojson", "r", encoding="utf-8") as geojson_file:
             to_return = json.load(geojson_file)
         
         return to_return
@@ -118,11 +120,11 @@ def return_week_route(weekend_status):
     讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
     """ 
     if weekend_status == "week":
-        with open(r"static\geojson\week_route.geojson", "r", encoding="utf-8") as geojson_file:
+        with open(r"static/geojson/week_route.geojson", "r", encoding="utf-8") as geojson_file:
             to_return = json.load(geojson_file)
 
     elif weekend_status == "weekend":
-        with open(r"static\geojson\weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
+        with open(r"static/geojson/weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
             to_return = json.load(geojson_file)
 
     return to_return
@@ -134,11 +136,11 @@ def refresh_weekend_route_sample(frac: float = 0.3):
     """
     try:
         # 周末
-        WEEK_LOC = r'static\data\週間起訖站點統計_202307.geojson'
-        WEEK_OUTPUT = r"static\geojson\week_route.geojson"
+        WEEK_LOC = r'static/data/週間起訖站點統計_202307.geojson'
+        WEEK_OUTPUT = r"static/geojson/week_route.geojson"
 
-        WEEKEND_LOC = r'static\data\週末起訖站點統計_202307.geojson'
-        WEEKEND_OUTPUT = r"static\geojson\weekend_route.geojson"
+        WEEKEND_LOC = r'static/data/週末起訖站點統計_202307.geojson'
+        WEEKEND_OUTPUT = r"static/geojson/weekend_route.geojson"
 
         def movement(FILE_LOC,WEEKEND_OUTPUT, frac = 0.3):
 
@@ -175,14 +177,14 @@ def refresh_html(token: str):
 
 @app.get("/h10_租")
 def get_top10():
-    with open(r"static\data\h10付費_租出.json", "r", encoding="utf-8") as json_file:
+    with open(r"static/data/h10付費_租出.json", "r", encoding="utf-8") as json_file:
         to_return = json.load(json_file)
 
     return to_return
 
 @app.get("/h10_還")
 def get_top10():
-    with open(r"static\data\h10付費_還入.json", "r", encoding="utf-8") as json_file:
+    with open(r"static/data/h10付費_還入.json", "r", encoding="utf-8") as json_file:
         to_return = json.load(json_file)
 
     return to_return

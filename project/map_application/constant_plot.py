@@ -15,14 +15,15 @@ sys.path.append(dname)
 plt.rcParams['font.sans-serif'] = ['Taipei Sans TC Beta'] 
 plt.rcParams['axes.unicode_minus'] = False 
 
-pd.set_option('display.max_columns', None)
-
-db_loc = dname+'\warehouse\data_sandbox.duckdb'
-conn = duckdb.connect(database = db_loc)
-sna_loc = conn.execute("SELECT distinct sna, latitude as lat,longitude as lng FROM youbike").fetch_df()
-conn.close()
-
-gdf = gpd.read_file(dname+'\project\map_application\static\data\週末起訖站點統計_202307.geojson')
+try:
+    db_loc = dname+'/warehouse/data_sandbox.duckdb'
+    conn = duckdb.connect(database = db_loc)
+    sna_loc = conn.execute("SELECT distinct sna, latitude as lat,longitude as lng FROM youbike").fetch_df()
+    conn.close()
+except: # for docker
+    conn = duckdb.connect('/workspace/warehouse/data_sandbox.duckdb')
+    sna_loc = conn.execute("SELECT distinct sna, latitude as lat,longitude as lng FROM youbike").fetch_df()
+    conn.close()
 
 def get_lat_lon(df,from_stop,to_stop):
     return df.merge(sna_loc, left_on=f"{from_stop}", right_on="sna")\
@@ -35,7 +36,7 @@ def get_lat_lon(df,from_stop,to_stop):
 def generate_distribution_plot():
     
     conn = duckdb.connect(database=db_loc)
-    df = conn.execute("SELECT * FROM youbike").fetch_df()[["sna","available_return_bikes","infoTime","latitude","longitude","infoDate","total"]]
+    df = conn.execute("SELECT distinct sna,latitude,longitude,total FROM youbike ORDER BY total").fetch_df()
     conn.close()
 
     m = folium.Map(location=[25.08,121.53], zoom_start=12,
@@ -59,7 +60,7 @@ def generate_distribution_plot():
         else:
             return 0.8
 
-    for _, row in df[["sna","latitude","longitude","total"]].drop_duplicates(subset="sna").sort_values("total",ascending=True).iterrows():
+    for _, row in df.iterrows():
         folium.CircleMarker(
             location=[row['latitude'], row['longitude']],
             radius=max(row["total"]/10,3),  
@@ -104,19 +105,23 @@ def generate_distribution_plot():
 
     m.get_root().html.add_child(folium.Element(legend_html))
 
-    output =  dname+"\project\map_application\static\distribute.html"
+    output =  dname+"/project/map_application/static/distribute.html"
     m.save(fr'{output}')
 
 def generate_exist_rate():
 
     conn = duckdb.connect(database=db_loc)
-    df = conn.execute("SELECT * FROM youbike").fetch_df()[["sna","available_return_bikes","infoTime","latitude","longitude","infoDate","total"]]
+    df = conn.execute("SELECT * FROM youbike where infoDate = '2024-09-30' ").fetch_df()[["sna","available_return_bikes","infoTime","latitude","longitude","infoDate","total"]]
     conn.close()
-    df = df.query("infoDate == '2024-09-30'")
+
     zt = df.query("available_return_bikes ==0").groupby(["sna"],as_index=False).agg(zt = ("sna","count"))
-    df = df.query("available_return_bikes !=0").groupby(["sna","latitude","longitude"],as_index=False).agg(nzt = ("sna","count"))\
-    .merge(zt,how="left",on="sna").fillna(0)
+    
+    df = df.query("available_return_bikes !=0")\
+            .groupby(["sna","latitude","longitude"],as_index=False)\
+            .agg(nzt = ("sna","count"))\
+            .merge(zt,how="left",on="sna").fillna(0)
     df["zsr"] = 1- df["zt"] / (df["nzt"]+ df["zt"])
+
     def rate(row):
         if row <0.6:
             return "低"
@@ -191,14 +196,14 @@ def generate_exist_rate():
         """
 
         m.get_root().html.add_child(folium.Element(legend_html))
-        m.save(dname +f"\project\map_application\static\{save_name}.html")
+        m.save(dname +f"/project/map_application/static/{save_name}.html")
 
-    plot(gpd.read_file(dname+"\warehouse\見車率_202307.geojson").rename(columns={"stop_name":"sna","category":"見車率"}),"見車率")
+    plot(gpd.read_file(dname+"/warehouse/見車率_202307.geojson").rename(columns={"stop_name":"sna","category":"見車率"}),"見車率")
     plot(df,"見車率_0930")
 
 def generate_fee_plot():
 
-    df = pd.read_csv(dname+r"\project\map_application\static\data\202312_轉乘YouBike2.0票證刷卡資料.csv")
+    df = pd.read_csv(dname+r"/project/map_application/static/data/202312_轉乘YouBike2.0票證刷卡資料.csv")
 
     routes_pattern = df.groupby(["借車站", "還車站",'lat_start', 'lng_start', 'lat_end', 'lng_end','distance_km'], as_index=False)\
     .agg(路線次數 = ("index", "nunique"),
@@ -313,4 +318,4 @@ def generate_fee_plot():
     """
     
     mymap.get_root().html.add_child(folium.Element(legend_html))
-    mymap.save(dname+r"\project\map_application\static\bike_routes_map.html")
+    mymap.save(dname+r"/project/map_application/static/bike_routes_map.html")

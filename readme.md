@@ -12,7 +12,7 @@
 ## 如何運行
 #### 使用 Docker
 - docker build -t image_fastapi .
-- docker run -d -p host_port:container_port image_fastapi
+- docker run -d -p host_port:container_port image_fastapi : **docker run -d -p 8080:8080 image_fastapi** 
 
 #### 使用 local host
 1. `創立虛擬環境` python -m venv env 
