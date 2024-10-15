@@ -2,6 +2,8 @@
 
 此專案使用 FastAPI 構建，提供多個 API 端點來進行台北市 YouBike 自行車站點的即時數據視覺化和路徑分析。
 整合了自行車站點數據、地理數據，使用於 Mapbox 或 Leaflet 等地圖視覺化套件中，並使用 d3.js 呈現圖表。
+- [Project Insight: Figma🔗](https://www.figma.com/board/bCYcyvGmbqv04DFtOnzoMu/Untitled?node-id=0-1&t=0spJ1V31cWquDL9G-1)
+- [Online Host: Render(Free Plan)🔗](https://sandbox-render-helper.onrender.com)
 
 ## 專案目的
 
