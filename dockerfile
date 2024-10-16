@@ -1,6 +1,12 @@
 # 使用 Python 3.10 作為基礎映像
 FROM python:3.10
 
+# 更新系統並安裝 GDAL 和其他依賴(for mac)
+RUN apt-get update && apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    && apt-get clean
+
 # 設置工作目錄到項目根目錄
 WORKDIR /workspace/project/map_application
 
