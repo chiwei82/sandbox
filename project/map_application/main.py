@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent
 cache = {}
 
 # 通用緩存檔案讀取函數
-def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: int = 10):
+async def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: int = 10):
     """
     通用的緩存檔案讀取功能。檢查緩存是否存在且未過期，否則重新讀取檔案。
     """
@@ -50,7 +50,7 @@ def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: int = 1
 
 # 抓取台北市公共自行車即時資訊
 @app.get("/bike-stations")
-def get_bike_stations():
+async def get_bike_stations():
     """
     抓取台北市公共自行車即時資訊
     """
@@ -67,7 +67,7 @@ def get_bike_stations():
 
 # 獲取現在時間
 @app.get("/time")
-def get_time():
+async def get_time():
     """
     獲取現在時間
     """
@@ -75,7 +75,7 @@ def get_time():
 
 # 抓取地點天氣
 @app.get("/weather/{city_name}")
-def get_weather(city_name: str):
+async def get_weather(city_name: str):
     """
     抓取地點天氣: 參數 -> 城市名稱
     """
@@ -83,16 +83,16 @@ def get_weather(city_name: str):
 
 # 回傳 "台灣" 的 GeoJSON
 @app.get("/country_moi")
-def get_country_moi():
+async def get_country_moi():
     """
     回傳 "台灣" 的 GeoJSON
     """
     file_path = r"static/geojson/COUNTY_MOI_1130718.json"
-    return load_file_with_cache(file_path, "country_moi")
+    return await load_file_with_cache(file_path, "country_moi")
 
 # 回傳 "台北" 的 GeoJSON (週間 或 週末)
 @app.get("/geojson/{weekend_status}")
-def get_geojson(weekend_status: str):
+async def get_geojson(weekend_status: str):
     """
     回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間 或 週末)
     """
@@ -105,11 +105,11 @@ def get_geojson(weekend_status: str):
     else:
         return {"error": "Invalid weekend status"}
 
-    return load_file_with_cache(file_path, cache_key)
+    return await load_file_with_cache(file_path, cache_key)
 
 # 回傳 站點使用量 (週間 或 週末) 前 20 名站點
 @app.get("/top_ten_routes/{weekend_status}")
-def get_top_ten_routes(weekend_status: str):
+async def get_top_ten_routes(weekend_status: str):
     """
     回傳站點使用量 (週間 或 週末) 前 20 名站點
     """
@@ -122,7 +122,7 @@ def get_top_ten_routes(weekend_status: str):
     else:
         return {"error": "Invalid weekend status"}
 
-    def json_etl(file_path):
+    async def json_etl(file_path):
         top = pd.read_csv(file_path)\
             .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
             .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
@@ -138,13 +138,13 @@ def get_top_ten_routes(weekend_status: str):
         output_path = fr"static/geojson/top_ten_{weekend_status}.geojson"
         gdf.to_file(output_path, driver="GeoJSON")
 
-        return load_file_with_cache(output_path, f"top_ten_{weekend_status}")
+        return await load_file_with_cache(output_path, f"top_ten_{weekend_status}")
 
-    return json_etl(file_path)
+    return await json_etl(file_path)
 
 # 讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
 @app.get("/mapbox/routes/{weekend_status}")
-def get_routes(weekend_status: str):
+async def get_routes(weekend_status: str):
     """
     讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
     """
@@ -157,11 +157,11 @@ def get_routes(weekend_status: str):
     else:
         return {"error": "Invalid weekend status"}
 
-    return load_file_with_cache(file_path, cache_key)
+    return await load_file_with_cache(file_path, cache_key)
 
 # 將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
 @app.get("/mapbox/refresh_weekend_route_sample/{frac}")
-def get_refresh_weekend_route(frac: float = 0.3):
+async def get_refresh_weekend_route(frac: float = 0.3):
     """
     將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
     """
@@ -184,8 +184,8 @@ def get_refresh_weekend_route(frac: float = 0.3):
             gpd.GeoDataFrame(slice[["sum_of_txn_times", "width", "geometry"]], geometry='geometry')\
                 .to_file(WEEKEND_OUTPUT, driver="GeoJSON")
 
-        movement(WEEK_LOC, WEEK_OUTPUT, frac)
-        movement(WEEKEND_LOC, WEEKEND_OUTPUT, frac)
+        await movement(WEEK_LOC, WEEK_OUTPUT, frac)
+        await movement(WEEKEND_LOC, WEEKEND_OUTPUT, frac)
 
         # 清除舊的緩存，讓下次請求時重新讀取新資料
         cache.pop("week_route", None)
@@ -197,7 +197,7 @@ def get_refresh_weekend_route(frac: float = 0.3):
 
 # 刷新 HTML
 @app.get("/refresh/constant_html/{token}")
-def get_constant_html(token: str):
+async def get_constant_html(token: str):
     if token == "admin":
         try:
             logger.info("Admin access granted, refreshing constant HTML data.")
@@ -214,15 +214,15 @@ def get_constant_html(token: str):
 
 # 付費資料
 @app.get("/h10_rent")
-def get_top10_rent():
+async def get_top10_rent():
     file_path = r"static/data/h10付費_租出.json"
-    return load_file_with_cache(file_path, "h10_rent")
+    return await load_file_with_cache(file_path, "h10_rent")
 
 # 還入資料
 @app.get("/h10_returned")
-def get_top10_returned():
+async def get_top10_returned():
     file_path = r"static/data/h10付費_還入.json"
-    return load_file_with_cache(file_path, "h10_returned")
+    return await load_file_with_cache(file_path, "h10_returned")
 
 # 路由設定
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
@@ -244,11 +244,3 @@ async def root():
         with home_path.open("r", encoding="utf-8") as file:
             return file.read()
     return HTMLResponse(status_code=404, content="Home page not found.")
-
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    """Serve the favicon."""
-    favicon_path = BASE_DIR / "static/favicon.ico"
-    if favicon_path.exists():
-        return FileResponse(favicon_path)
-    return HTMLResponse(status_code=404, content="Favicon not found.")
