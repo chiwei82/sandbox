@@ -138,10 +138,10 @@
          <!-- Horizontal slides for 見車率 iframes -->
          <div class="fp-slides">
             <div class="slide">
-                <iframe src="/見車率"></iframe>
+                <iframe src="/available_bikes"></iframe>
             </div>
             <div class="slide">
-                <iframe src="/見車率_0930"></iframe>
+                <iframe src="/available_bikes_0930"></iframe>
             </div>
         </div>
     </div>
@@ -166,11 +166,11 @@
         scrollingSpeed: 700
     });
     
-    fetch("/h10_還")
+    fetch("/h10_rent")
         .then(respnse => respnse.json())
         .then(data => renderTable("#table1-container","還車站(In)", data))
 
-    fetch("/h10_租")
+    fetch("/h10_returned")
         .then(respnse => respnse.json())
         .then(data => renderTable("#table2-container","租車站(Out)",data))
 

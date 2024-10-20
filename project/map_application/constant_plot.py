@@ -161,7 +161,7 @@ def generate_exist_rate():
                 fill_opacity=0.8  
             ).add_to(m)
 
-        if save_name == "見車率_0930":
+        if save_name == "available_bikes_0930":
             p_content = "2024/09/30"
         else:
             p_content = ""

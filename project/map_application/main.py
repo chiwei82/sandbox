@@ -2,24 +2,53 @@ import requests
 from fastapi import FastAPI
 import pandas as pd
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from datetime import datetime, timedelta
 from shapely.geometry import LineString
 import geopandas as gpd
 import json
-
+import logging
 import os
 import sys
+from pathlib import Path
+
+# Logging 設置
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 設置路徑和全域緩存
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(os.path.dirname(os.path.dirname(abspath)))
 sys.path.append(os.path.dirname(abspath))
 sys.path.append(dname)
 from bike_data import get_weather as bike_weather
-from constant_plot import generate_distribution_plot,generate_exist_rate,generate_fee_plot
+from constant_plot import generate_distribution_plot, generate_exist_rate, generate_fee_plot
 
 app = FastAPI()
+BASE_DIR = Path(__file__).resolve().parent
 
-# index.html
+# 全域緩存字典
+cache = {}
+
+# 通用緩存檔案讀取函數
+def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: int = 10):
+    """
+    通用的緩存檔案讀取功能。檢查緩存是否存在且未過期，否則重新讀取檔案。
+    """
+    now = datetime.now()
+    if cache_key in cache:
+        cached_data, expiry_time = cache[cache_key]
+        if expiry_time > now:
+            logger.info(f"Returning cached data for {cache_key}")
+            return cached_data  # 使用緩存
+    # 重新讀取檔案並更新緩存
+    with open(file_path, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    cache[cache_key] = (data, now + timedelta(minutes=expiry_minutes))
+    logger.info(f"Loaded data from file for {cache_key}")
+    return data
+
+# 抓取台北市公共自行車即時資訊
 @app.get("/bike-stations")
 def get_bike_stations():
     """
@@ -36,6 +65,7 @@ def get_bike_stations():
     df = df.sort_values("infoTime").query(f"infoTime >= '{datetime.now()-timedelta(days=1)}'")
     return data
 
+# 獲取現在時間
 @app.get("/time")
 def get_time():
     """
@@ -43,7 +73,7 @@ def get_time():
     """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# leaflet.html
+# 抓取地點天氣
 @app.get("/weather/{city_name}")
 def get_weather(city_name: str):
     """
@@ -51,204 +81,174 @@ def get_weather(city_name: str):
     """
     return bike_weather(city_name, json=True)
 
+# 回傳 "台灣" 的 GeoJSON
 @app.get("/country_moi")
 def get_country_moi():
     """
     回傳 "台灣" 的 GeoJSON
     """
-    with open(r"static/geojson/COUNTY_MOI_1130718.json", "r", encoding="utf-8") as geojson_file:
-        geojson_data = json.load(geojson_file)
+    file_path = r"static/geojson/COUNTY_MOI_1130718.json"
+    return load_file_with_cache(file_path, "country_moi")
 
-    return geojson_data
-
+# 回傳 "台北" 的 GeoJSON (週間 或 週末)
 @app.get("/geojson/{weekend_status}")
-def load_geojson(weekend_status: str):
+def get_geojson(weekend_status: str):
     """
-    回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間) 以便繪圖使用
+    回傳 "台北" 的 GeoJSON。裡面包含各行政區的 站點使用量 (週間 或 週末)
     """
-    def load_json(file_path):
-        with open(f"{file_path}", "r", encoding="utf-8") as geojson_file:
-            geojson_data = json.load(geojson_file)
-        return geojson_data
-
     if weekend_status == "week":
-        geojson_data = load_json("static/geojson/OSM_DATA.geojson")    
-    
+        file_path = "static/geojson/OSM_DATA.geojson"
+        cache_key = "geojson_week"
     elif weekend_status == "weekend":
-        geojson_data = load_json("static/geojson/OSM_DATA_weekend.geojson")    
+        file_path = "static/geojson/OSM_DATA_weekend.geojson"
+        cache_key = "geojson_weekend"
+    else:
+        return {"error": "Invalid weekend status"}
 
-    return geojson_data
+    return load_file_with_cache(file_path, cache_key)
 
-@app.get("/top_ten_routes/{weekend_status}") 
-def return_top_tY(weekend_status: str):
+# 回傳 站點使用量 (週間 或 週末) 前 20 名站點
+@app.get("/top_ten_routes/{weekend_status}")
+def get_top_ten_routes(weekend_status: str):
     """
-    回傳 站點使用量 (週間) 前 20 站點
+    回傳站點使用量 (週間 或 週末) 前 20 名站點
     """
     if weekend_status == "week":
         file_path = r"static/data/週間起訖站點統計_cleaned.csv"
+        cache_key = "top_ten_week"
     elif weekend_status == "weekend":
         file_path = r"static/data/週末起訖站點統計_cleaned.csv"
+        cache_key = "top_ten_weekend"
+    else:
+        return {"error": "Invalid weekend status"}
 
     def json_etl(file_path):
         top = pd.read_csv(file_path)\
             .sort_values(by="mean_of_txn_times_byRoutes", ascending=False)\
             .head(20)[["mean_of_txn_times_byRoutes", "on_stop", "off_stop", 
-                    'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
-        
+                       'lat_start', 'lng_start', 'lat_end', 'lng_end', "district_name"]]
+
         def create_linestring(row):
             return LineString([(row['lng_start'], row['lat_start']), (row['lng_end'], row['lat_end'])])
 
         top['geometry'] = top.apply(create_linestring, axis=1)
         top['mean_of_txn_times_byRoutes'] = top['mean_of_txn_times_byRoutes'].round(0)
         gdf = gpd.GeoDataFrame(top, geometry='geometry')
-        
-        gpd.GeoDataFrame(gdf, geometry='geometry')\
-            .to_file(fr"static/geojson/top_ten_{weekend_status}.geojson", driver="GeoJSON")
-        
-        with open(fr"static/geojson/top_ten_{weekend_status}.geojson", "r", encoding="utf-8") as geojson_file:
-            to_return = json.load(geojson_file)
-        
-        return to_return
-    
-    to_return = json_etl(file_path)
 
-    return to_return
+        output_path = fr"static/geojson/top_ten_{weekend_status}.geojson"
+        gdf.to_file(output_path, driver="GeoJSON")
 
+        return load_file_with_cache(output_path, f"top_ten_{weekend_status}")
+
+    return json_etl(file_path)
+
+# 讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
 @app.get("/mapbox/routes/{weekend_status}")
-def return_week_route(weekend_status):
+def get_routes(weekend_status: str):
     """
     讀取 SAMPLED WEEK ROUTE 並回傳 GeoJSON
-    """ 
-    if weekend_status == "week":
-        with open(r"static/geojson/week_route.geojson", "r", encoding="utf-8") as geojson_file:
-            to_return = json.load(geojson_file)
-
-    elif weekend_status == "weekend":
-        with open(r"static/geojson/weekend_route.geojson", "r", encoding="utf-8") as geojson_file:
-            to_return = json.load(geojson_file)
-
-    return to_return
-
-@app.get("/mapbox/refresh_weekend_route_sample/{frac}")
-def refresh_weekend_route_sample(frac: float = 0.3):
     """
-    將週間、週末起訖站點統計進行隨機抽樣並將 GeoJSON 存成新檔案
+    if weekend_status == "week":
+        file_path = r"static/geojson/week_route.geojson"
+        cache_key = "week_route"
+    elif weekend_status == "weekend":
+        file_path = r"static/geojson/weekend_route.geojson"
+        cache_key = "weekend_route"
+    else:
+        return {"error": "Invalid weekend status"}
+
+    return load_file_with_cache(file_path, cache_key)
+
+# 將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
+@app.get("/mapbox/refresh_weekend_route_sample/{frac}")
+def get_refresh_weekend_route(frac: float = 0.3):
+    """
+    將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
     """
     try:
-        # 周末
         WEEK_LOC = r'static/data/週間起訖站點統計_202307.geojson'
         WEEK_OUTPUT = r"static/geojson/week_route.geojson"
 
         WEEKEND_LOC = r'static/data/週末起訖站點統計_202307.geojson'
         WEEKEND_OUTPUT = r"static/geojson/weekend_route.geojson"
 
-        def movement(FILE_LOC,WEEKEND_OUTPUT, frac = 0.3):
-
+        def movement(FILE_LOC, WEEKEND_OUTPUT, frac=0.3):
             gdf = gpd.read_file(FILE_LOC)
 
             slice = pd.DataFrame()
             for district in gdf.district_origin.unique():
                 df_filtered = gdf.query(f"district_origin == '{district}'")
-                slice = pd.concat([slice,df_filtered.sample(frac=frac, random_state=1)])
-            slice = slice.sort_values("sum_of_txn_times",ascending=False)
-        
-            gpd.GeoDataFrame(slice[["sum_of_txn_times","width","geometry"]], geometry='geometry')\
+                slice = pd.concat([slice, df_filtered.sample(frac=frac, random_state=1)])
+            slice = slice.sort_values("sum_of_txn_times", ascending=False)
+
+            gpd.GeoDataFrame(slice[["sum_of_txn_times", "width", "geometry"]], geometry='geometry')\
                 .to_file(WEEKEND_OUTPUT, driver="GeoJSON")
 
-        movement(WEEK_LOC, WEEK_OUTPUT, frac)    
+        movement(WEEK_LOC, WEEK_OUTPUT, frac)
         movement(WEEKEND_LOC, WEEKEND_OUTPUT, frac)
+
+        # 清除舊的緩存，讓下次請求時重新讀取新資料
+        cache.pop("week_route", None)
+        cache.pop("weekend_route", None)
 
         return f"{frac} random sampled has been refreshed. status: 200 ok"
     except Exception as e:
         return str(e)
 
+# 刷新 HTML
 @app.get("/refresh/constant_html/{token}")
-def refresh_html(token: str):
+def get_constant_html(token: str):
     if token == "admin":
         try:
-            # generate_distribution_plot()
-            # generate_exist_rate()
+            logger.info("Admin access granted, refreshing constant HTML data.")
+            # 生成統計圖表
             generate_fee_plot()
-            return f"html has been refreshed. status: 200 ok"
+            logger.info("Constant HTML has been refreshed successfully.")
+            return {"message": "HTML has been refreshed. status: 200 OK"}
         except Exception as e:
-            return str(e)
+            logger.error(f"Error while refreshing HTML: {str(e)}")
+            return {"error": str(e)}
     else:
-        pass
+        logger.warning("Unauthorized access attempt to refresh constant HTML.")
+        return {"error": "Unauthorized"}
 
-@app.get("/h10_租")
-def get_top10():
-    with open(r"static/data/h10付費_租出.json", "r", encoding="utf-8") as json_file:
-        to_return = json.load(json_file)
+# 付費資料
+@app.get("/h10_rent")
+def get_top10_rent():
+    file_path = r"static/data/h10付費_租出.json"
+    return load_file_with_cache(file_path, "h10_rent")
 
-    return to_return
-
-@app.get("/h10_還")
-def get_top10():
-    with open(r"static/data/h10付費_還入.json", "r", encoding="utf-8") as json_file:
-        to_return = json.load(json_file)
-
-    return to_return
+# 還入資料
+@app.get("/h10_returned")
+def get_top10_returned():
+    file_path = r"static/data/h10付費_還入.json"
+    return load_file_with_cache(file_path, "h10_returned")
 
 # 路由設定
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+@app.get("/{file_name}", response_class=HTMLResponse)
+async def serve_html(file_name: str):
+    """Serve static HTML files dynamically based on the requested file name."""
+    file_path = BASE_DIR / f"static/{file_name}.html"
+    if file_path.exists():
+        with file_path.open("r", encoding="utf-8") as file:
+            return file.read()
+    return HTMLResponse(status_code=404, content="File not found.")
 
 @app.get("/", response_class=HTMLResponse)
-async def read_html():
-    with open("static/home.html", "r", encoding="utf-8") as file:
-        return file.read()
+async def root():
+    """Serve home.html when accessing the root path."""
+    home_path = BASE_DIR / "static/home.html"
+    if home_path.exists():
+        with home_path.open("r", encoding="utf-8") as file:
+            return file.read()
+    return HTMLResponse(status_code=404, content="Home page not found.")
 
-@app.get("/fullpage", response_class=HTMLResponse)
-async def read_html():
-    with open("static/fullpage.html", "r", encoding="utf-8") as file:
-        return file.read()
-
-@app.get("/index", response_class=HTMLResponse)
-async def read_html():
-    with open("static/index.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/mapbox", response_class=HTMLResponse)
-async def read_html():
-    with open("static/mapbox.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/leaflet", response_class=HTMLResponse)
-async def read_html():
-    with open("static/leaflet.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/mapbox_3d", response_class=HTMLResponse)
-async def read_html():
-    with open("static/mapbox_3d.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/d3", response_class=HTMLResponse)
-async def read_html():
-    with open("static/d3_.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/bike_routes_map", response_class=HTMLResponse)
-async def read_html():
-    with open("static/bike_routes_map.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/見車率", response_class=HTMLResponse)
-async def read_html():
-    with open("static/見車率.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-    
-@app.get("/見車率_0930", response_class=HTMLResponse)
-async def read_html():
-    with open("static/見車率_0930.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/distribute", response_class=HTMLResponse)
-async def read_html():
-    with open("static/distribute.html", "r", encoding="utf-8") as file:
-        return file.read()
-    
-@app.get("/test", response_class=HTMLResponse)
-async def read_html():
-    with open("static/test.html", "r", encoding="utf-8") as file:
-        return file.read()
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Serve the favicon."""
+    favicon_path = BASE_DIR / "static/favicon.ico"
+    if favicon_path.exists():
+        return FileResponse(favicon_path)
+    return HTMLResponse(status_code=404, content="Favicon not found.")
