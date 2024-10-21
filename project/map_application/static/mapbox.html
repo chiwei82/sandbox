@@ -67,15 +67,23 @@
             background-color: #005f8f;
         }
 
+        #loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999; /* 確保它顯示在地圖之上 */
+            display: none; /* 預設隱藏 */
+        }
+
         /* 加載動畫樣式 */
         .spinner {
-            border: 6px solid #f3f3f3;
+            border: 16px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 3px solid white;
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-            animation: spin 1s linear infinite;
+            border-top: 16px solid #d51212;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.5s linear infinite;
         }
 
         /* 左下標籤 */
@@ -115,11 +123,22 @@
         
 
         <div id="comparison-container">
+
+            <div id="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+
             <div id="before" class="map"></div>
+
+            <div id="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+
             <div id="after" class="map"></div>
         </div>
 
         <!-- 左下標籤 -->
+        
         <div class="label-left">週間🏢</div>
 
         <!-- 右下標籤 -->
@@ -146,7 +165,7 @@
 
         // 清空按鈕內容，顯示加載動畫和 loading 文本，並將背景變為紅色
         button.innerHTML = '<div class="spinner"></div>Loading...';
-        button.style.backgroundColor = '#FF0000';  // 背景變為紅色
+        button.style.backgroundColor = '#333';  // 背景變為紅色
         button.disabled = true;  // 禁用按鈕防止多次點擊
 
         // 發送 GET 請求到 FastAPI 後台
