@@ -1,6 +1,16 @@
 // Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpYm55IiwiYSI6ImNrcWtjMDg0NjA0anQyb3RnZnl0cDJkYmYifQ.hqyJUg0ZRzAZbcJwkfs0bQ';
 
+// 顯示加載動畫
+function showLoadingSpinner() {
+    document.getElementById('loading-spinner').style.display = 'block';
+}
+
+// 隱藏加載動畫
+function hideLoadingSpinner() {
+    document.getElementById('loading-spinner').style.display = 'none';
+}
+
 // Initialize the map with a function
 function createMap(containerId, style, fetchPath) {
     var map = new mapboxgl.Map({
@@ -11,6 +21,9 @@ function createMap(containerId, style, fetchPath) {
         pitch: 0,
         bearing: 0
     });
+
+    // 顯示加載動畫
+    showLoadingSpinner();
 
     map.on('load', function () {
         fetch(fetchPath)
@@ -25,64 +38,83 @@ function createMap(containerId, style, fetchPath) {
               'type': 'geojson',
               'data': data
             });
-      
-            // 添加熱力圖圖層
+
+            // 添加一個簡單的點圖層來快速展示初始地圖
             map.addLayer({
-              'id': 'bike-heatmap',
-              'type': 'heatmap',
-              'source': 'route_data', 
-              'maxzoom': 18, 
+              'id': 'initial-points',
+              'type': 'circle',
+              'source': 'route_data',
               'paint': {
-                // 設置熱力圖的權重，根據 sum_of_txn_times 的值動態調整
-                'heatmap-weight': [
-                  'interpolate',
-                  ['linear'],
-                  ['get', 'sum_of_txn_times'],
-                  1, 0,    
-                  maxSumOfTxnTimes, 1  
-                ],
-                // 設置熱力圖的強度，根據地圖縮放級別動態調整
-                'heatmap-intensity': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  0, 1,  // 在縮放級別 0 時，強度為 1
-                  18, 3  // 在縮放級別 18 時，強度為 3
-                ],
-                // 使用光譜式漸變來設置熱力圖的顏色梯度
-                'heatmap-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['heatmap-density'],  // 根據熱力密度設定顏色
-                  0, 'rgba(33,102,172,0)',   // 最低密度，透明
-                  0.1, 'rgb(103,169,207)',   // 漸變的藍色
-                  0.2, 'rgb(209,229,240)',   // 更淺的藍色
-                  0.4, 'rgb(253,219,199)',   // 漸變到橙色
-                  0.6, 'rgb(239,138,98)',    // 漸變到紅色
-                  0.8, 'rgb(178,24,43)',     // 更深的紅色
-                  1, 'rgb(128,0,38)'         // 最深的紅色
-                ],
-                // 設置每個點的半徑，根據地圖縮放級別動態調整
-                'heatmap-radius': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  0, 2,   // 在縮放級別 0 時，半徑為 2
-                  18, 20  // 在縮放級別 18 時，半徑為 20
-                ],
-                // 設置熱力圖的透明度
-                'heatmap-opacity': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  0, 1,  // 在縮放級別 0 時，透明度為 1
-                  18, 0.6  // 在縮放級別 18 時，透明度為 0.6
-                ]
+                'circle-radius': 5,
+                'circle-color': '#007cbf',
+                'circle-opacity': 0.6
               }
             });
+
+            // 延遲加載熱力圖層，確保地圖快速顯示後才渲染大量數據
+            setTimeout(function() {
+                map.addLayer({
+                  'id': 'bike-heatmap',
+                  'type': 'heatmap',
+                  'source': 'route_data', 
+                  'maxzoom': 18, 
+                  'paint': {
+                    'heatmap-weight': [
+                      'interpolate',
+                      ['linear'],
+                      ['get', 'sum_of_txn_times'],
+                      1, 0,    
+                      maxSumOfTxnTimes, 1  
+                    ],
+                    'heatmap-intensity': [
+                      'interpolate',
+                      ['linear'],
+                      ['zoom'],
+                      0, 1,
+                      18, 3
+                    ],
+                    'heatmap-color': [
+                      'interpolate',
+                      ['linear'],
+                      ['heatmap-density'],
+                      0, 'rgba(33,102,172,0)',
+                      0.1, 'rgb(103,169,207)',
+                      0.2, 'rgb(209,229,240)',
+                      0.4, 'rgb(253,219,199)',
+                      0.6, 'rgb(239,138,98)',
+                      0.8, 'rgb(178,24,43)',
+                      1, 'rgb(128,0,38)'
+                    ],
+                    'heatmap-radius': [
+                      'interpolate',
+                      ['linear'],
+                      ['zoom'],
+                      0, 2,
+                      18, 20
+                    ],
+                    'heatmap-opacity': [
+                      'interpolate',
+                      ['linear'],
+                      ['zoom'],
+                      0, 1,
+                      18, 0.6
+                    ]
+                  }
+                });
+
+                // 移除快速加載的點圖層
+                map.removeLayer('initial-points');
+
+                // 隱藏加載動畫
+                hideLoadingSpinner();
+            }, 2000); // 2 秒後加載熱力圖層
           })
-          .catch(error => console.error('Error fetching GeoJSON data:', error));
+          .catch(error => {
+            console.error('Error fetching GeoJSON data:', error);
+            hideLoadingSpinner(); // 發生錯誤也隱藏加載動畫
+          });
     });
+
     return map;
 }
 
