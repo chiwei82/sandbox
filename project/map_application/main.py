@@ -9,6 +9,7 @@ import geopandas as gpd
 import json
 import logging
 import aiofiles
+import httpx
 import os
 import sys
 from pathlib import Path
@@ -54,19 +55,18 @@ async def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: i
 
 # 抓取台北市公共自行車即時資訊
 @app.get("/bike-stations")
-def get_bike_stations():
+async def get_bike_stations():
     """
     抓取台北市公共自行車即時資訊
     """
     url = "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
-    response = requests.get(url)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
     data = response.json()
 
     for station in data:
         station['sna'] = station['sna'].replace("YouBike2.0_", "")
 
-    df = pd.DataFrame(data)
-    df = df.sort_values("infoTime").query(f"infoTime >= '{datetime.now()-timedelta(days=1)}'")
     return data
 
 # 獲取現在時間
