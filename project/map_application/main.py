@@ -8,6 +8,7 @@ from shapely.geometry import LineString
 import geopandas as gpd
 import json
 import logging
+import aiofiles
 import os
 import sys
 from pathlib import Path
@@ -41,16 +42,19 @@ async def load_file_with_cache(file_path: str, cache_key: str, expiry_minutes: i
         if expiry_time > now:
             logger.info(f"Returning cached data for {cache_key}")
             return cached_data  # 使用緩存
-    # 重新讀取檔案並更新緩存
-    with open(file_path, "r", encoding="utf-8") as file:
-        data = json.load(file)
+
+    # 使用 aiofiles 進行異步檔案讀取
+    async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
+        data = await file.read()
+        data = json.loads(data)
+
     cache[cache_key] = (data, now + timedelta(minutes=expiry_minutes))
     logger.info(f"Loaded data from file for {cache_key}")
     return data
 
 # 抓取台北市公共自行車即時資訊
 @app.get("/bike-stations")
-async def get_bike_stations():
+def get_bike_stations():
     """
     抓取台北市公共自行車即時資訊
     """
@@ -67,7 +71,7 @@ async def get_bike_stations():
 
 # 獲取現在時間
 @app.get("/time")
-async def get_time():
+def get_time():
     """
     獲取現在時間
     """
@@ -75,7 +79,7 @@ async def get_time():
 
 # 抓取地點天氣
 @app.get("/weather/{city_name}")
-async def get_weather(city_name: str):
+def get_weather(city_name: str):
     """
     抓取地點天氣: 參數 -> 城市名稱
     """
@@ -161,7 +165,7 @@ async def get_routes(weekend_status: str):
 
 # 將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
 @app.get("/mapbox/refresh_weekend_route_sample/{frac}")
-async def get_refresh_weekend_route(frac: float = 0.3):
+def get_refresh_weekend_route(frac: float = 0.3):
     """
     將週間、週末起訖站點統計進行隨機抽樣並將結果存成新的 GeoJSON 檔案
     """
@@ -184,8 +188,8 @@ async def get_refresh_weekend_route(frac: float = 0.3):
             gpd.GeoDataFrame(slice[["sum_of_txn_times", "width", "geometry"]], geometry='geometry')\
                 .to_file(WEEKEND_OUTPUT, driver="GeoJSON")
 
-        await movement(WEEK_LOC, WEEK_OUTPUT, frac)
-        await movement(WEEKEND_LOC, WEEKEND_OUTPUT, frac)
+        movement(WEEK_LOC, WEEK_OUTPUT, frac)
+        movement(WEEKEND_LOC, WEEKEND_OUTPUT, frac)
 
         # 清除舊的緩存，讓下次請求時重新讀取新資料
         cache.pop("week_route", None)
@@ -197,7 +201,7 @@ async def get_refresh_weekend_route(frac: float = 0.3):
 
 # 刷新 HTML
 @app.get("/refresh/constant_html/{token}")
-async def get_constant_html(token: str):
+def get_constant_html(token: str):
     if token == "admin":
         try:
             logger.info("Admin access granted, refreshing constant HTML data.")
